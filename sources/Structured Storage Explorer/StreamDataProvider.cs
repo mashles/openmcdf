@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Be.Windows.Forms;
 using OpenMcdf;
 
@@ -11,7 +9,7 @@ namespace StructuredStorageExplorer
         /// <summary>
         /// Modifying stream
         /// </summary>
-        CFStream _modifiedStream;
+        readonly CfStream _modifiedStream;
 
         /// <summary>
         /// Contains information about changes.
@@ -21,14 +19,14 @@ namespace StructuredStorageExplorer
         /// <summary>
         /// Contains a byte collection.
         /// </summary>
-        ByteCollection _bytes;
+        readonly ByteCollection _bytes;
 
 
         /// <summary>
         /// Initializes a new instance of the DynamicByteProvider class.
         /// </summary>
         /// <param name="bytes"></param>
-        public StreamDataProvider(CFStream modifiedStream)
+        public StreamDataProvider(CfStream modifiedStream)
         {
             _bytes = new ByteCollection(modifiedStream.GetData());
             _modifiedStream = modifiedStream;
@@ -57,10 +55,7 @@ namespace StructuredStorageExplorer
         /// <summary>
         /// Gets the byte collection.
         /// </summary>
-        public ByteCollection Bytes
-        {
-            get { return _bytes; }
-        }
+        public ByteCollection Bytes => _bytes;
 
         #region IByteProvider Members
         /// <summary>
@@ -78,7 +73,7 @@ namespace StructuredStorageExplorer
         {
             _hasChanges = false;
 
-            _modifiedStream.SetData(this._bytes.ToArray());
+            _modifiedStream.SetData(_bytes.ToArray());
         }
 
         /// <summary>
@@ -118,9 +113,9 @@ namespace StructuredStorageExplorer
         /// <param name="length">the length of bytes to delete.</param>
         public void DeleteBytes(long index, long length)
         {
-            int internal_index = (int)Math.Max(0, index);
-            int internal_length = (int)Math.Min((int)Length, length);
-            _bytes.RemoveRange(internal_index, internal_length);
+            var internalIndex = (int)Math.Max(0, index);
+            var internalLength = (int)Math.Min((int)Length, length);
+            _bytes.RemoveRange(internalIndex, internalLength);
 
             OnLengthChanged(EventArgs.Empty);
             OnChanged(EventArgs.Empty);
@@ -142,13 +137,7 @@ namespace StructuredStorageExplorer
         /// <summary>
         /// Gets the length of the bytes in the byte collection.
         /// </summary>
-        public long Length
-        {
-            get
-            {
-                return _bytes.Count;
-            }
-        }
+        public long Length => _bytes.Count;
 
         /// <summary>
         /// Returns true

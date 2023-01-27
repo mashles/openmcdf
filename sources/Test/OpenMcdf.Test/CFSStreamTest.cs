@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Text;
 using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OpenMcdf;
 using System.IO;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace OpenMcdf.Test
 {
@@ -12,17 +9,12 @@ namespace OpenMcdf.Test
     /// Summary description for UnitTest1
     /// </summary>
     [TestClass]
-    public class CFSStreamTest
+    public class CfsStreamTest
     {
 
         //const String TestContext.TestDir = "C:\\TestOutputFiles\\";
 
-        public CFSStreamTest()
-        {
-
-        }
-
-        private TestContext testContextInstance;
+        private TestContext _testContextInstance;
 
         /// <summary>
         ///Gets or sets the test context which provides
@@ -30,14 +22,8 @@ namespace OpenMcdf.Test
         ///</summary>
         public TestContext TestContext
         {
-            get
-            {
-                return testContextInstance;
-            }
-            set
-            {
-                testContextInstance = value;
-            }
+            get => _testContextInstance;
+            set => _testContextInstance = value;
         }
 
         #region Additional test attributes
@@ -65,55 +51,71 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_READ_STREAM()
         {
-            String filename = "report.xls";
+            const string filename = "report.xls";
 
-            CompoundFile cf = new CompoundFile(filename);
-            CFStream foundStream = cf.RootStorage.GetStream("Workbook");
+            using var cf = new CompoundFile(filename);
+            var foundStream = cf.RootStorage.GetStream("Workbook");
 
-            byte[] temp = foundStream.GetData();
+            var temp = foundStream.GetData();
 
             Assert.IsNotNull(temp);
             Assert.IsTrue(temp.Length > 0);
 
-            cf.Close();
         }
 
         [TestMethod]
         public void Test_WRITE_STREAM()
         {
-            const int BUFFER_LENGTH = 10000;
+            const int bufferLength = 1000000;
 
-            byte[] b = Helpers.GetBuffer(BUFFER_LENGTH);
+            var b = Helpers.GetBuffer(bufferLength);
 
-            CompoundFile cf = new CompoundFile();
-            CFStream myStream = cf.RootStorage.AddStream("MyStream");
+            using var cf = new CompoundFile();
+            var myStream = cf.RootStorage.AddStream("MyStream");
 
             Assert.IsNotNull(myStream);
             Assert.IsTrue(myStream.Size == 0);
 
             myStream.SetData(b);
 
-            Assert.IsTrue(myStream.Size == BUFFER_LENGTH, "Stream size differs from buffer size");
+            Assert.IsTrue(myStream.Size == bufferLength, "Stream size differs from buffer size");
 
-            cf.Close();
+        }
+        
+        [TestMethod]
+        public void Test_WRITE_SPAN_STREAM()
+        {
+            const int bufferLength = 1000000;
+
+            var b = Helpers.GetBuffer(bufferLength);
+
+            using var cf = new CompoundFile();
+            var myStream = cf.RootStorage.AddStream("MyStream");
+
+            Assert.IsNotNull(myStream);
+            Assert.IsTrue(myStream.Size == 0);
+
+            myStream.SetData(b.AsSpan());
+
+            Assert.IsTrue(myStream.Size == bufferLength, "Stream size differs from buffer size");
         }
 
         [TestMethod]
         public void Test_WRITE_MINI_STREAM()
         {
-            const int BUFFER_LENGTH = 1023; // < 4096
+            const int bufferLength = 1023; // < 4096
 
-            byte[] b = Helpers.GetBuffer(BUFFER_LENGTH);
+            var b = Helpers.GetBuffer(bufferLength);
 
-            CompoundFile cf = new CompoundFile();
-            CFStream myStream = cf.RootStorage.AddStream("MyMiniStream");
+            var cf = new CompoundFile();
+            var myStream = cf.RootStorage.AddStream("MyMiniStream");
 
             Assert.IsNotNull(myStream);
             Assert.IsTrue(myStream.Size == 0);
 
             myStream.SetData(b);
 
-            Assert.IsTrue(myStream.Size == BUFFER_LENGTH, "Mini Stream size differs from buffer size");
+            Assert.IsTrue(myStream.Size == bufferLength, "Mini Stream size differs from buffer size");
 
             cf.Close();
         }
@@ -121,10 +123,10 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_ZERO_LENGTH_WRITE_STREAM()
         {
-            byte[] b = new byte[0];
+            var b = new byte[0];
 
-            CompoundFile cf = new CompoundFile();
-            CFStream myStream = cf.RootStorage.AddStream("MyStream");
+            var cf = new CompoundFile();
+            var myStream = cf.RootStorage.AddStream("MyStream");
 
             Assert.IsNotNull(myStream);
 
@@ -150,10 +152,10 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_ZERO_LENGTH_RE_WRITE_STREAM()
         {
-            byte[] b = new byte[0];
+            var b = new byte[0];
 
-            CompoundFile cf = new CompoundFile();
-            CFStream myStream = cf.RootStorage.AddStream("MyStream");
+            var cf = new CompoundFile();
+            var myStream = cf.RootStorage.AddStream("MyStream");
 
             Assert.IsNotNull(myStream);
 
@@ -169,8 +171,8 @@ namespace OpenMcdf.Test
             cf.Save("ZERO_LENGTH_STREAM_RE.cfs");
             cf.Close();
 
-            CompoundFile cfo = new CompoundFile("ZERO_LENGTH_STREAM_RE.cfs");
-            CFStream oStream = cfo.RootStorage.GetStream("MyStream");
+            var cfo = new CompoundFile("ZERO_LENGTH_STREAM_RE.cfs");
+            var oStream = cfo.RootStorage.GetStream("MyStream");
 
             Assert.IsNotNull(oStream);
             Assert.IsTrue(oStream.Size == 0);
@@ -202,11 +204,11 @@ namespace OpenMcdf.Test
         public void Test_WRITE_STREAM_WITH_DIFAT()
         {
             //const int SIZE = 15388609; //Incredible condition of 'resonance' between FAT and DIFAT sec number
-            const int SIZE = 15345665; // 64 -> 65 NOT working (in the past ;-)  )
-            byte[] b = Helpers.GetBuffer(SIZE, 0);
+            const int size = 15345665; // 64 -> 65 NOT working (in the past ;-)  )
+            var b = Helpers.GetBuffer(size, 0);
 
-            CompoundFile cf = new CompoundFile();
-            CFStream myStream = cf.RootStorage.AddStream("MyStream");
+            var cf = new CompoundFile();
+            var myStream = cf.RootStorage.AddStream("MyStream");
             Assert.IsNotNull(myStream);
             myStream.SetData(b);
 
@@ -214,11 +216,11 @@ namespace OpenMcdf.Test
             cf.Close();
 
 
-            CompoundFile cf2 = new CompoundFile("WRITE_STREAM_WITH_DIFAT.cfs");
-            CFStream st = cf2.RootStorage.GetStream("MyStream");
+            var cf2 = new CompoundFile("WRITE_STREAM_WITH_DIFAT.cfs");
+            var st = cf2.RootStorage.GetStream("MyStream");
 
             Assert.IsNotNull(cf2);
-            Assert.IsTrue(st.Size == SIZE);
+            Assert.IsTrue(st.Size == size);
 
             Assert.IsTrue(Helpers.CompareBuffer(b, st.GetData()));
 
@@ -233,71 +235,71 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_WRITE_MINISTREAM_READ_REWRITE_STREAM()
         {
-            const int BIGGER_SIZE = 350;
+            const int biggerSize = 350;
             //const int SMALLER_SIZE = 290;
-            const int MEGA_SIZE = 18000000;
+            const int megaSize = 18000000;
 
-            byte[] ba1 = Helpers.GetBuffer(BIGGER_SIZE, 1);
-            byte[] ba2 = Helpers.GetBuffer(BIGGER_SIZE, 2);
-            byte[] ba3 = Helpers.GetBuffer(BIGGER_SIZE, 3);
-            byte[] ba4 = Helpers.GetBuffer(BIGGER_SIZE, 4);
-            byte[] ba5 = Helpers.GetBuffer(BIGGER_SIZE, 5);
+            var ba1 = Helpers.GetBuffer(biggerSize, 1);
+            var ba2 = Helpers.GetBuffer(biggerSize, 2);
+            var ba3 = Helpers.GetBuffer(biggerSize, 3);
+            var ba4 = Helpers.GetBuffer(biggerSize, 4);
+            var ba5 = Helpers.GetBuffer(biggerSize, 5);
 
             //WRITE 5 (mini)streams in a compound file --
 
-            CompoundFile cfa = new CompoundFile();
+            var cfa = new CompoundFile();
 
-            CFStream myStream = cfa.RootStorage.AddStream("MyFirstStream");
+            var myStream = cfa.RootStorage.AddStream("MyFirstStream");
             Assert.IsNotNull(myStream);
 
             myStream.SetData(ba1);
-            Assert.IsTrue(myStream.Size == BIGGER_SIZE);
+            Assert.IsTrue(myStream.Size == biggerSize);
 
-            CFStream myStream2 = cfa.RootStorage.AddStream("MySecondStream");
+            var myStream2 = cfa.RootStorage.AddStream("MySecondStream");
             Assert.IsNotNull(myStream2);
 
             myStream2.SetData(ba2);
-            Assert.IsTrue(myStream2.Size == BIGGER_SIZE);
+            Assert.IsTrue(myStream2.Size == biggerSize);
 
-            CFStream myStream3 = cfa.RootStorage.AddStream("MyThirdStream");
+            var myStream3 = cfa.RootStorage.AddStream("MyThirdStream");
             Assert.IsNotNull(myStream3);
 
             myStream3.SetData(ba3);
-            Assert.IsTrue(myStream3.Size == BIGGER_SIZE);
+            Assert.IsTrue(myStream3.Size == biggerSize);
 
-            CFStream myStream4 = cfa.RootStorage.AddStream("MyFourthStream");
+            var myStream4 = cfa.RootStorage.AddStream("MyFourthStream");
             Assert.IsNotNull(myStream4);
 
             myStream4.SetData(ba4);
-            Assert.IsTrue(myStream4.Size == BIGGER_SIZE);
+            Assert.IsTrue(myStream4.Size == biggerSize);
 
-            CFStream myStream5 = cfa.RootStorage.AddStream("MyFifthStream");
+            var myStream5 = cfa.RootStorage.AddStream("MyFifthStream");
             Assert.IsNotNull(myStream5);
 
             myStream5.SetData(ba5);
-            Assert.IsTrue(myStream5.Size == BIGGER_SIZE);
+            Assert.IsTrue(myStream5.Size == biggerSize);
 
             cfa.Save("WRITE_MINISTREAM_READ_REWRITE_STREAM.cfs");
 
             cfa.Close();
 
             // Now get the second stream and rewrite it smaller
-            byte[] bb = Helpers.GetBuffer(MEGA_SIZE);
-            CompoundFile cfb = new CompoundFile("WRITE_MINISTREAM_READ_REWRITE_STREAM.cfs");
-            CFStream myStreamB = cfb.RootStorage.GetStream("MySecondStream");
+            var bb = Helpers.GetBuffer(megaSize);
+            var cfb = new CompoundFile("WRITE_MINISTREAM_READ_REWRITE_STREAM.cfs");
+            var myStreamB = cfb.RootStorage.GetStream("MySecondStream");
             Assert.IsNotNull(myStreamB);
             myStreamB.SetData(bb);
-            Assert.IsTrue(myStreamB.Size == MEGA_SIZE);
+            Assert.IsTrue(myStreamB.Size == megaSize);
 
-            byte[] bufferB = myStreamB.GetData();
+            var bufferB = myStreamB.GetData();
             cfb.Save("WRITE_MINISTREAM_READ_REWRITE_STREAM_2ND.cfs");
             cfb.Close();
 
-            CompoundFile cfc = new CompoundFile("WRITE_MINISTREAM_READ_REWRITE_STREAM_2ND.cfs");
-            CFStream myStreamC = cfc.RootStorage.GetStream("MySecondStream");
-            Assert.IsTrue(myStreamC.Size == MEGA_SIZE, "DATA SIZE FAILED");
+            var cfc = new CompoundFile("WRITE_MINISTREAM_READ_REWRITE_STREAM_2ND.cfs");
+            var myStreamC = cfc.RootStorage.GetStream("MySecondStream");
+            Assert.IsTrue(myStreamC.Size == megaSize, "DATA SIZE FAILED");
 
-            byte[] bufferC = myStreamC.GetData();
+            var bufferC = myStreamC.GetData();
             Assert.IsTrue(Helpers.CompareBuffer(bufferB, bufferC), "DATA INTEGRITY FAILED");
 
             cfc.Close();
@@ -314,21 +316,21 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_RE_WRITE_SMALLER_STREAM()
         {
-            const int BUFFER_LENGTH = 8000;
+            const int bufferLength = 8000;
 
-            String filename = "report.xls";
+            var filename = "report.xls";
 
-            byte[] b = Helpers.GetBuffer(BUFFER_LENGTH);
+            var b = Helpers.GetBuffer(bufferLength);
 
-            CompoundFile cf = new CompoundFile(filename);
-            CFStream foundStream = cf.RootStorage.GetStream("Workbook");
+            var cf = new CompoundFile(filename);
+            var foundStream = cf.RootStorage.GetStream("Workbook");
             foundStream.SetData(b);
             cf.Save("reportRW_SMALL.xls");
             cf.Close();
 
             cf = new CompoundFile("reportRW_SMALL.xls");
-            byte[] c = cf.RootStorage.GetStream("Workbook").GetData();
-            Assert.IsTrue(c.Length == BUFFER_LENGTH);
+            var c = cf.RootStorage.GetStream("Workbook").GetData();
+            Assert.IsTrue(c.Length == bufferLength);
             cf.Close();
 
             if (File.Exists("reportRW_SMALL.xls"))
@@ -339,20 +341,20 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_RE_WRITE_SMALLER_MINI_STREAM()
         {
-            String filename = "report.xls";
+            var filename = "report.xls";
 
-            CompoundFile cf = new CompoundFile(filename);
-            CFStream foundStream = cf.RootStorage.GetStream("\x05SummaryInformation");
-            int TEST_LENGTH = (int)foundStream.Size - 20;
-            byte[] b = Helpers.GetBuffer(TEST_LENGTH);
+            var cf = new CompoundFile(filename);
+            var foundStream = cf.RootStorage.GetStream("\x05SummaryInformation");
+            var testLength = (int)foundStream.Size - 20;
+            var b = Helpers.GetBuffer(testLength);
             foundStream.SetData(b);
 
             cf.Save("RE_WRITE_SMALLER_MINI_STREAM.xls");
             cf.Close();
 
             cf = new CompoundFile("RE_WRITE_SMALLER_MINI_STREAM.xls");
-            byte[] c = cf.RootStorage.GetStream("\x05SummaryInformation").GetData();
-            Assert.IsTrue(c.Length == TEST_LENGTH);
+            var c = cf.RootStorage.GetStream("\x05SummaryInformation").GetData();
+            Assert.IsTrue(c.Length == testLength);
             Assert.IsTrue(Helpers.CompareBuffer(c, b));
             cf.Close();
 
@@ -364,16 +366,16 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_TRANSACTED_ADD_STREAM_TO_EXISTING_FILE()
         {
-            String srcFilename = "report.xls";
-            String dstFilename = "reportOverwrite.xls";
+            var srcFilename = "report.xls";
+            var dstFilename = "reportOverwrite.xls";
 
             File.Copy(srcFilename, dstFilename, true);
 
-            CompoundFile cf = new CompoundFile(dstFilename, CFSUpdateMode.Update, CFSConfiguration.Default);
+            var cf = new CompoundFile(dstFilename, CfsUpdateMode.Update, CfsConfiguration.Default);
 
-            byte[] buffer = Helpers.GetBuffer(5000);
+            var buffer = Helpers.GetBuffer(5000);
 
-            CFStream addedStream = cf.RootStorage.AddStream("MyNewStream");
+            var addedStream = cf.RootStorage.AddStream("MyNewStream");
             addedStream.SetData(buffer);
 
             cf.Commit();
@@ -388,21 +390,21 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_TRANSACTED_ADD_REMOVE_MULTIPLE_STREAM_TO_EXISTING_FILE()
         {
-            String srcFilename = "report.xls";
-            String dstFilename = "reportOverwriteMultiple.xls";
+            var srcFilename = "report.xls";
+            var dstFilename = "reportOverwriteMultiple.xls";
 
             File.Copy(srcFilename, dstFilename, true);
 
-            CompoundFile cf = new CompoundFile(dstFilename, CFSUpdateMode.ReadOnly, CFSConfiguration.SectorRecycle);
+            var cf = new CompoundFile(dstFilename, CfsUpdateMode.ReadOnly, CfsConfiguration.SectorRecycle);
 
             //CompoundFile cf = new CompoundFile();
 
-            Random r = new Random();
+            var r = new Random();
 
-            for (int i = 0; i < 254; i++)
+            for (var i = 0; i < 254; i++)
             {
                 //byte[] buffer = Helpers.GetBuffer(r.Next(100, 3500), (byte)i);
-                byte[] buffer = Helpers.GetBuffer(1995, 1);
+                var buffer = Helpers.GetBuffer(1995, 1);
 
                 //if (i > 0)
                 //{
@@ -412,7 +414,7 @@ namespace OpenMcdf.Test
                 //    }
                 //}
 
-                CFStream addedStream = cf.RootStorage.AddStream("MyNewStream" + i.ToString());
+                var addedStream = cf.RootStorage.AddStream("MyNewStream" + i);
                 Assert.IsNotNull(addedStream, "Stream not found");
                 addedStream.SetData(buffer);
 
@@ -439,22 +441,22 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_TRANSACTED_ADD_MINISTREAM_TO_EXISTING_FILE()
         {
-            String srcFilename = "report.xls";
-            String dstFilename = "reportOverwriteMultiple.xls";
+            var srcFilename = "report.xls";
+            var dstFilename = "reportOverwriteMultiple.xls";
 
             File.Copy(srcFilename, dstFilename, true);
 
-            CompoundFile cf = new CompoundFile(dstFilename, CFSUpdateMode.Update, CFSConfiguration.SectorRecycle | CFSConfiguration.EraseFreeSectors);
+            var cf = new CompoundFile(dstFilename, CfsUpdateMode.Update, CfsConfiguration.SectorRecycle | CfsConfiguration.EraseFreeSectors);
 
-            Random r = new Random();
+            var r = new Random();
 
-            byte[] buffer = Helpers.GetBuffer(31, 0x0A);
+            var buffer = Helpers.GetBuffer(31, 0x0A);
 
             cf.RootStorage.AddStream("MyStream").SetData(buffer);
             cf.Commit();
             cf.Close();
-            FileStream larger = new FileStream(dstFilename, FileMode.Open);
-            FileStream smaller = new FileStream(srcFilename, FileMode.Open);
+            var larger = new FileStream(dstFilename, FileMode.Open);
+            var smaller = new FileStream(srcFilename, FileMode.Open);
 
             // Equal condition if minisector can be "allocated"
             // within the existing standard sector border
@@ -472,18 +474,18 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_TRANSACTED_REMOVE_MINI_STREAM_ADD_MINISTREAM_TO_EXISTING_FILE()
         {
-            String srcFilename = "report.xls";
-            String dstFilename = "reportOverwrite2.xls";
+            var srcFilename = "report.xls";
+            var dstFilename = "reportOverwrite2.xls";
 
             File.Copy(srcFilename, dstFilename, true);
 
-            CompoundFile cf = new CompoundFile(dstFilename, CFSUpdateMode.Update, CFSConfiguration.SectorRecycle | CFSConfiguration.EraseFreeSectors);
+            var cf = new CompoundFile(dstFilename, CfsUpdateMode.Update, CfsConfiguration.SectorRecycle | CfsConfiguration.EraseFreeSectors);
 
             cf.RootStorage.Delete("\x05SummaryInformation");
 
-            byte[] buffer = Helpers.GetBuffer(2000);
+            var buffer = Helpers.GetBuffer(2000);
 
-            CFStream addedStream = cf.RootStorage.AddStream("MyNewStream");
+            var addedStream = cf.RootStorage.AddStream("MyNewStream");
             addedStream.SetData(buffer);
 
             cf.Commit();
@@ -500,10 +502,10 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_DELETE_STREAM_1()
         {
-            String filename = "MultipleStorage.cfs";
+            var filename = "MultipleStorage.cfs";
 
-            CompoundFile cf = new CompoundFile(filename);
-            CFStorage cfs = cf.RootStorage.GetStorage("MyStorage");
+            var cf = new CompoundFile(filename);
+            var cfs = cf.RootStorage.GetStorage("MyStorage");
             cfs.Delete("MySecondStream");
 
             cf.Save(TestContext + "MultipleStorage_REMOVED_STREAM_1.cfs");
@@ -513,10 +515,10 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_DELETE_STREAM_2()
         {
-            String filename = "MultipleStorage.cfs";
+            var filename = "MultipleStorage.cfs";
 
-            CompoundFile cf = new CompoundFile(filename);
-            CFStorage cfs = cf.RootStorage.GetStorage("MyStorage").GetStorage("AnotherStorage");
+            var cf = new CompoundFile(filename);
+            var cfs = cf.RootStorage.GetStorage("MyStorage").GetStorage("AnotherStorage");
 
             cfs.Delete("AnotherStream");
 
@@ -529,21 +531,21 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_WRITE_AND_READ_CFS()
         {
-            String filename = "WRITE_AND_READ_CFS.cfs";
+            var filename = "WRITE_AND_READ_CFS.cfs";
 
-            CompoundFile cf = new CompoundFile();
+            var cf = new CompoundFile();
 
-            CFStorage st = cf.RootStorage.AddStorage("MyStorage");
-            CFStream sm = st.AddStream("MyStream");
-            byte[] b = Helpers.GetBuffer(220, 0x0A);
+            var st = cf.RootStorage.AddStorage("MyStorage");
+            var sm = st.AddStream("MyStream");
+            var b = Helpers.GetBuffer(220, 0x0A);
             sm.SetData(b);
 
             cf.Save(filename);
             cf.Close();
 
-            CompoundFile cf2 = new CompoundFile(filename);
-            CFStorage st2 = cf2.RootStorage.GetStorage("MyStorage");
-            CFStream sm2 = st2.GetStream("MyStream");
+            var cf2 = new CompoundFile(filename);
+            var st2 = cf2.RootStorage.GetStorage("MyStorage");
+            var sm2 = st2.GetStream("MyStream");
             cf2.Close();
 
             Assert.IsNotNull(sm2);
@@ -560,9 +562,9 @@ namespace OpenMcdf.Test
         public void Test_INCREMENTAL_SIZE_MULTIPLE_WRITE_AND_READ_CFS()
         {
 
-            Random r = new Random();
+            var r = new Random();
 
-            for (int i = r.Next(1, 100); i < 1024 * 1024 * 70; i = i << 1)
+            for (var i = r.Next(1, 100); i < 1024 * 1024 * 70; i = i << 1)
             {
                 SingleWriteReadMatching(i + r.Next(0, 3));
             }
@@ -574,11 +576,11 @@ namespace OpenMcdf.Test
         public void Test_INCREMENTAL_SIZE_MULTIPLE_WRITE_AND_READ_CFS_STREAM()
         {
 
-            Random r = new Random();
+            var r = new Random();
 
-            for (int i = r.Next(1, 100); i < 1024 * 1024 * 70; i = i << 1)
+            for (var i = r.Next(1, 100); i < 1024 * 1024 * 70; i = i << 1)
             {
-                SingleWriteReadMatchingSTREAMED(i + r.Next(0, 3));
+                SingleWriteReadMatchingStreamed(i + r.Next(0, 3));
             }
 
         }
@@ -586,12 +588,12 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_DELETE_ZERO_LENGTH_STREAM()
         {
-            byte[] b = new byte[0];
+            var b = new byte[0];
 
-            CompoundFile cf = new CompoundFile();
+            var cf = new CompoundFile();
 
-            string zeroLengthName = "MyZeroStream";
-            CFStream myStream = cf.RootStorage.AddStream(zeroLengthName);
+            var zeroLengthName = "MyZeroStream";
+            var myStream = cf.RootStorage.AddStream(zeroLengthName);
 
             Assert.IsNotNull(myStream);
 
@@ -604,16 +606,16 @@ namespace OpenMcdf.Test
                 Assert.Fail("Failed setting zero length stream");
             }
 
-            string filename = "DeleteZeroLengthStream.cfs";
+            var filename = "DeleteZeroLengthStream.cfs";
             cf.Save(filename);
             cf.Close();
 
-            CompoundFile cf2 = new CompoundFile(filename);
+            var cf2 = new CompoundFile(filename);
 
             // Execption in next line!
             cf2.RootStorage.Delete(zeroLengthName);
 
-            CFStream zeroStream2 = null;
+            CfStream zeroStream2 = null;
 
             try
             {
@@ -622,7 +624,7 @@ namespace OpenMcdf.Test
             catch (Exception ex)
             {
                 Assert.IsNull(zeroStream2);
-                Assert.IsInstanceOfType(ex, typeof(CFItemNotFound));
+                Assert.IsInstanceOfType(ex, typeof(CfItemNotFound));
             }
 
             cf2.Save("MultipleDeleteMiniStream.cfs");
@@ -645,24 +647,24 @@ namespace OpenMcdf.Test
         private void SingleTransactedChange(int size)
         {
 
-            String filename = "INCREMENTAL_SIZE_MULTIPLE_WRITE_AND_READ_CFS.cfs";
+            var filename = "INCREMENTAL_SIZE_MULTIPLE_WRITE_AND_READ_CFS.cfs";
 
             if (File.Exists(filename))
                 File.Delete(filename);
 
-            CompoundFile cf = new CompoundFile();
-            CFStorage st = cf.RootStorage.AddStorage("MyStorage");
-            CFStream sm = st.AddStream("MyStream");
+            var cf = new CompoundFile();
+            var st = cf.RootStorage.AddStorage("MyStorage");
+            var sm = st.AddStream("MyStream");
 
-            byte[] b = Helpers.GetBuffer(size);
+            var b = Helpers.GetBuffer(size);
 
             sm.SetData(b);
             cf.Save(filename);
             cf.Close();
 
-            CompoundFile cf2 = new CompoundFile(filename);
-            CFStorage st2 = cf2.RootStorage.GetStorage("MyStorage");
-            CFStream sm2 = st2.GetStream("MyStream");
+            var cf2 = new CompoundFile(filename);
+            var st2 = cf2.RootStorage.GetStorage("MyStorage");
+            var sm2 = st2.GetStream("MyStream");
 
             Assert.IsNotNull(sm2);
             Assert.IsTrue(sm2.Size == size);
@@ -674,24 +676,24 @@ namespace OpenMcdf.Test
         private void SingleWriteReadMatching(int size)
         {
 
-            String filename = "INCREMENTAL_SIZE_MULTIPLE_WRITE_AND_READ_CFS.cfs";
+            var filename = "INCREMENTAL_SIZE_MULTIPLE_WRITE_AND_READ_CFS.cfs";
 
             if (File.Exists(filename))
                 File.Delete(filename);
 
-            CompoundFile cf = new CompoundFile();
-            CFStorage st = cf.RootStorage.AddStorage("MyStorage");
-            CFStream sm = st.AddStream("MyStream");
+            var cf = new CompoundFile();
+            var st = cf.RootStorage.AddStorage("MyStorage");
+            var sm = st.AddStream("MyStream");
 
-            byte[] b = Helpers.GetBuffer(size);
+            var b = Helpers.GetBuffer(size);
 
             sm.SetData(b);
             cf.Save(filename);
             cf.Close();
 
-            CompoundFile cf2 = new CompoundFile(filename);
-            CFStorage st2 = cf2.RootStorage.GetStorage("MyStorage");
-            CFStream sm2 = st2.GetStream("MyStream");
+            var cf2 = new CompoundFile(filename);
+            var st2 = cf2.RootStorage.GetStorage("MyStorage");
+            var sm2 = st2.GetStream("MyStream");
 
             Assert.IsNotNull(sm2);
             Assert.IsTrue(sm2.Size == size);
@@ -700,23 +702,23 @@ namespace OpenMcdf.Test
             cf2.Close();
         }
 
-        private void SingleWriteReadMatchingSTREAMED(int size)
+        private void SingleWriteReadMatchingStreamed(int size)
         {
-            MemoryStream ms = new MemoryStream(size);
+            var ms = new MemoryStream(size);
 
-            CompoundFile cf = new CompoundFile();
-            CFStorage st = cf.RootStorage.AddStorage("MyStorage");
-            CFStream sm = st.AddStream("MyStream");
+            var cf = new CompoundFile();
+            var st = cf.RootStorage.AddStorage("MyStorage");
+            var sm = st.AddStream("MyStream");
 
-            byte[] b = Helpers.GetBuffer(size);
+            var b = Helpers.GetBuffer(size);
 
             sm.SetData(b);
             cf.Save(ms);
             cf.Close();
 
-            CompoundFile cf2 = new CompoundFile(ms);
-            CFStorage st2 = cf2.RootStorage.GetStorage("MyStorage");
-            CFStream sm2 = st2.GetStream("MyStream");
+            var cf2 = new CompoundFile(ms);
+            var st2 = cf2.RootStorage.GetStorage("MyStorage");
+            var sm2 = st2.GetStream("MyStream");
 
             Assert.IsNotNull(sm2);
             Assert.IsTrue(sm2.Size == size);
@@ -729,22 +731,22 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_APPEND_DATA_TO_STREAM()
         {
-            MemoryStream ms = new MemoryStream();
+            var ms = new MemoryStream();
 
-            byte[] b = new byte[] { 0x0, 0x1, 0x2, 0x3 };
-            byte[] b2 = new byte[] { 0x4, 0x5, 0x6, 0x7 };
+            var b = new byte[] { 0x0, 0x1, 0x2, 0x3 };
+            var b2 = new byte[] { 0x4, 0x5, 0x6, 0x7 };
 
-            CompoundFile cf = new CompoundFile();
-            CFStream st = cf.RootStorage.AddStream("MyMiniStream");
+            var cf = new CompoundFile();
+            var st = cf.RootStorage.AddStream("MyMiniStream");
             st.SetData(b);
             st.Append(b2);
 
             cf.Save(ms);
             cf.Close();
 
-            byte[] cmp = new byte[] { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 };
+            var cmp = new byte[] { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 };
             cf = new CompoundFile(ms);
-            byte[] data = cf.RootStorage.GetStream("MyMiniStream").GetData();
+            var data = cf.RootStorage.GetStream("MyMiniStream").GetData();
             Assert.IsTrue(Helpers.CompareBuffer(cmp, data));
 
         }
@@ -752,18 +754,18 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_COPY_FROM_STREAM()
         {
-            byte[] b = Helpers.GetBuffer(100);
-            MemoryStream ms = new MemoryStream(b);
+            var b = Helpers.GetBuffer(100);
+            var ms = new MemoryStream(b);
 
-            CompoundFile cf = new CompoundFile();
-            CFStream st = cf.RootStorage.AddStream("MyImportedStream");
+            var cf = new CompoundFile();
+            var st = cf.RootStorage.AddStream("MyImportedStream");
             st.CopyFrom(ms);
             ms.Close();
             cf.Save("COPY_FROM_STREAM.cfs");
             cf.Close();
 
             cf = new CompoundFile("COPY_FROM_STREAM.cfs");
-            byte[] data = cf.RootStorage.GetStream("MyImportedStream").GetData();
+            var data = cf.RootStorage.GetStream("MyImportedStream").GetData();
 
             Assert.IsTrue(Helpers.CompareBuffer(b, data));
 
@@ -811,15 +813,15 @@ namespace OpenMcdf.Test
         {
             CompoundFile cf = null;
             //CFStream st = null;
-            byte[] b = Helpers.GetBuffer(1024 * 1024 * 2); //2MB buffer
+            var b = Helpers.GetBuffer(1024 * 1024 * 2); //2MB buffer
 
-            cf = new CompoundFile(CFSVersion.Ver_3, CFSConfiguration.Default);
+            cf = new CompoundFile(CfsVersion.Ver3, CfsConfiguration.Default);
             cf.RootStorage.AddStream("AStream").SetData(b);
             cf.Save("$Test_RESIZE_STREAM.cfs");
             cf.Close();
 
-            cf = new CompoundFile("$Test_RESIZE_STREAM.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle);
-            CFStream item = cf.RootStorage.GetStream("AStream");
+            cf = new CompoundFile("$Test_RESIZE_STREAM.cfs", CfsUpdateMode.Update, CfsConfiguration.SectorRecycle);
+            var item = cf.RootStorage.GetStream("AStream");
             item.Resize(item.Size / 2);
             //cf.RootStorage.AddStream("BStream").SetData(b);
             cf.Commit(true);
@@ -829,60 +831,60 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_RESIZE_STREAM_TRANSITION_TO_MINI()
         {
-            String FILE_NAME = "$Test_RESIZE_STREAM_TRANSITION_TO_MINI.cfs";
+            var fileName = "$Test_RESIZE_STREAM_TRANSITION_TO_MINI.cfs";
             CompoundFile cf = null;
 
-            byte[] b = Helpers.GetBuffer(1024 * 1024 * 2); //2MB buffer
-            byte[] b100 = new byte[100];
+            var b = Helpers.GetBuffer(1024 * 1024 * 2); //2MB buffer
+            var b100 = new byte[100];
 
-            for (int i = 0; i < 100; i++)
+            for (var i = 0; i < 100; i++)
             {
                 b100[i] = b[i];
             }
 
-            cf = new CompoundFile(CFSVersion.Ver_3, CFSConfiguration.Default);
+            cf = new CompoundFile(CfsVersion.Ver3, CfsConfiguration.Default);
             cf.RootStorage.AddStream("AStream").SetData(b);
-            cf.Save(FILE_NAME);
+            cf.Save(fileName);
             cf.Close();
 
-            cf = new CompoundFile(FILE_NAME, CFSUpdateMode.Update, CFSConfiguration.SectorRecycle);
-            CFStream item = cf.RootStorage.GetStream("AStream");
+            cf = new CompoundFile(fileName, CfsUpdateMode.Update, CfsConfiguration.SectorRecycle);
+            var item = cf.RootStorage.GetStream("AStream");
             item.Resize(100);
             cf.Commit();
             cf.Close();
 
-            cf = new CompoundFile(FILE_NAME, CFSUpdateMode.ReadOnly, CFSConfiguration.Default);
+            cf = new CompoundFile(fileName, CfsUpdateMode.ReadOnly, CfsConfiguration.Default);
             Assert.IsTrue(Helpers.CompareBuffer(cf.RootStorage.GetStream("AStream").GetData(), b100));
             cf.Close();
 
-            if (File.Exists(FILE_NAME))
-                File.Delete(FILE_NAME);
+            if (File.Exists(fileName))
+                File.Delete(fileName);
         }
 
         [TestMethod]
         public void Test_RESIZE_STREAM_TRANSITION_TO_NORMAL()
         {
             CompoundFile cf = null;
-            byte[] b = Helpers.GetBuffer(1024 * 2, 0xAA); //2MB buffer
+            var b = Helpers.GetBuffer(1024 * 2, 0xAA); //2MB buffer
 
-            cf = new CompoundFile(CFSVersion.Ver_3, CFSConfiguration.Default);
+            cf = new CompoundFile(CfsVersion.Ver3, CfsConfiguration.Default);
             cf.RootStorage.AddStream("AStream").SetData(b);
             cf.Save("$Test_RESIZE_STREAM_TRANSITION_TO_NORMAL.cfs");
             cf.Save("$Test_RESIZE_STREAM_TRANSITION_TO_NORMAL2.cfs");
             cf.Close();
 
-            cf = new CompoundFile("$Test_RESIZE_STREAM_TRANSITION_TO_NORMAL.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle | CFSConfiguration.EraseFreeSectors);
-            CFStream item = cf.RootStorage.GetStream("AStream");
+            cf = new CompoundFile("$Test_RESIZE_STREAM_TRANSITION_TO_NORMAL.cfs", CfsUpdateMode.Update, CfsConfiguration.SectorRecycle | CfsConfiguration.EraseFreeSectors);
+            var item = cf.RootStorage.GetStream("AStream");
             item.Resize(5000);
             cf.Commit();
             cf.Close();
 
-            cf = new CompoundFile("$Test_RESIZE_STREAM_TRANSITION_TO_NORMAL.cfs", CFSUpdateMode.ReadOnly, CFSConfiguration.Default);
+            cf = new CompoundFile("$Test_RESIZE_STREAM_TRANSITION_TO_NORMAL.cfs", CfsUpdateMode.ReadOnly, CfsConfiguration.Default);
             item = cf.RootStorage.GetStream("AStream");
             Assert.IsTrue(item != null);
             Assert.IsTrue(item.Size == 5000);
 
-            byte[] buffer = new byte[2048];
+            var buffer = new byte[2048];
             item.Read(buffer, 0, 2048);
             Assert.IsTrue(Helpers.CompareBuffer(b, buffer));
 
@@ -893,27 +895,27 @@ namespace OpenMcdf.Test
         {
             CompoundFile cf = null;
 
-            byte[] b = Helpers.GetBuffer(1024 * 2);
+            var b = Helpers.GetBuffer(1024 * 2);
 
-            cf = new CompoundFile(CFSVersion.Ver_3, CFSConfiguration.Default);
+            cf = new CompoundFile(CfsVersion.Ver3, CfsConfiguration.Default);
             cf.RootStorage.AddStream("MiniStream").SetData(b);
             cf.Save("$Test_RESIZE_MINISTREAM.cfs");
             cf.Close();
 
-            cf = new CompoundFile("$Test_RESIZE_MINISTREAM.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle | CFSConfiguration.EraseFreeSectors);
-            CFStream item = cf.RootStorage.GetStream("MiniStream");
+            cf = new CompoundFile("$Test_RESIZE_MINISTREAM.cfs", CfsUpdateMode.Update, CfsConfiguration.SectorRecycle | CfsConfiguration.EraseFreeSectors);
+            var item = cf.RootStorage.GetStream("MiniStream");
             item.Resize(item.Size / 2);
 
             cf.Commit();
             cf.Close();
 
-            cf = new CompoundFile("$Test_RESIZE_MINISTREAM.cfs", CFSUpdateMode.ReadOnly, CFSConfiguration.Default);
-            CFStream st = cf.RootStorage.GetStream("MiniStream");
+            cf = new CompoundFile("$Test_RESIZE_MINISTREAM.cfs", CfsUpdateMode.ReadOnly, CfsConfiguration.Default);
+            var st = cf.RootStorage.GetStream("MiniStream");
 
             Assert.IsNotNull(st);
             Assert.IsTrue(st.Size == 1024);
 
-            byte[] buffer = new byte[1024];
+            var buffer = new byte[1024];
             st.Read(buffer, 0, 1024);
 
             Assert.IsTrue(Helpers.CompareBuffer(b, buffer, 1024));
@@ -926,22 +928,22 @@ namespace OpenMcdf.Test
         {
             CompoundFile cf = null;
 
-            byte[] b = Helpers.GetBuffer(1024 * 2);
+            var b = Helpers.GetBuffer(1024 * 2);
 
-            cf = new CompoundFile(CFSVersion.Ver_3, CFSConfiguration.Default);
+            cf = new CompoundFile(CfsVersion.Ver3, CfsConfiguration.Default);
             cf.RootStorage.AddStream("MiniStream").SetData(b);
             cf.Save("$Test_RESIZE_MINISTREAM_RECYCLE.cfs");
             cf.Close();
 
-            cf = new CompoundFile("$Test_RESIZE_MINISTREAM_RECYCLE.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle | CFSConfiguration.EraseFreeSectors);
-            CFStream item = cf.RootStorage.GetStream("MiniStream");
+            cf = new CompoundFile("$Test_RESIZE_MINISTREAM_RECYCLE.cfs", CfsUpdateMode.Update, CfsConfiguration.SectorRecycle | CfsConfiguration.EraseFreeSectors);
+            var item = cf.RootStorage.GetStream("MiniStream");
             item.Resize(item.Size / 2);
 
             cf.Commit();
             cf.Close();
 
-            cf = new CompoundFile("$Test_RESIZE_MINISTREAM_RECYCLE.cfs", CFSUpdateMode.ReadOnly, CFSConfiguration.SectorRecycle | CFSConfiguration.EraseFreeSectors);
-            CFStream st = cf.RootStorage.AddStream("ANewStream");
+            cf = new CompoundFile("$Test_RESIZE_MINISTREAM_RECYCLE.cfs", CfsUpdateMode.ReadOnly, CfsConfiguration.SectorRecycle | CfsConfiguration.EraseFreeSectors);
+            var st = cf.RootStorage.AddStream("ANewStream");
             st.SetData(Helpers.GetBuffer(400));
             cf.Save("$Test_RESIZE_MINISTREAM_RECYCLE2.cfs");
             cf.Close();
@@ -956,24 +958,24 @@ namespace OpenMcdf.Test
         public void Test_DELETE_STREAM_SECTOR_REUSE()
         {
             CompoundFile cf = null;
-            CFStream st = null;
+            CfStream st = null;
 
-            byte[] b = Helpers.GetBuffer(1024 * 1024 * 2); //2MB buffer
-            byte[] cmp = new byte[] { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 };
+            var b = Helpers.GetBuffer(1024 * 1024 * 2); //2MB buffer
+            var cmp = new byte[] { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 };
 
-            cf = new CompoundFile(CFSVersion.Ver_4, CFSConfiguration.Default);
+            cf = new CompoundFile(CfsVersion.Ver4, CfsConfiguration.Default);
             st = cf.RootStorage.AddStream("AStream");
             st.Append(b);
             cf.Save("SectorRecycle.cfs");
             cf.Close();
 
 
-            cf = new CompoundFile("SectorRecycle.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle);
+            cf = new CompoundFile("SectorRecycle.cfs", CfsUpdateMode.Update, CfsConfiguration.SectorRecycle);
             cf.RootStorage.Delete("AStream");
             cf.Commit(true);
             cf.Close();
 
-            cf = new CompoundFile("SectorRecycle.cfs", CFSUpdateMode.ReadOnly, CFSConfiguration.Default); //No sector recycle
+            cf = new CompoundFile("SectorRecycle.cfs", CfsUpdateMode.ReadOnly, CfsConfiguration.Default); //No sector recycle
             st = cf.RootStorage.AddStream("BStream");
             st.Append(Helpers.GetBuffer(1024 * 1024 * 1));
             cf.Save("SectorRecycleLarger.cfs");
@@ -981,15 +983,15 @@ namespace OpenMcdf.Test
 
             Assert.IsFalse((new FileInfo("SectorRecycle.cfs").Length) >= (new FileInfo("SectorRecycleLarger.cfs").Length));
 
-            cf = new CompoundFile("SectorRecycle.cfs", CFSUpdateMode.ReadOnly, CFSConfiguration.SectorRecycle);
+            cf = new CompoundFile("SectorRecycle.cfs", CfsUpdateMode.ReadOnly, CfsConfiguration.SectorRecycle);
             st = cf.RootStorage.AddStream("BStream");
             st.Append(Helpers.GetBuffer(1024 * 1024 * 1));
             cf.Save("SectorRecycleSmaller.cfs");
             cf.Close();
-            long larger = (new FileInfo("SectorRecycle.cfs").Length);
-            long smaller = (new FileInfo("SectorRecycleSmaller.cfs").Length);
+            var larger = (new FileInfo("SectorRecycle.cfs").Length);
+            var smaller = (new FileInfo("SectorRecycleSmaller.cfs").Length);
 
-            Assert.IsTrue(larger >= smaller, "Larger size:" + larger.ToString() + " - Smaller size:" + smaller.ToString());
+            Assert.IsTrue(larger >= smaller, "Larger size:" + larger + " - Smaller size:" + smaller);
 
         }
 
@@ -999,14 +1001,14 @@ namespace OpenMcdf.Test
         public void TEST_STREAM_VIEW()
         {
             Stream a = null;
-            List<Sector> temp = new List<Sector>();
-            Sector s = new Sector(512);
-            Buffer.BlockCopy(BitConverter.GetBytes((int)1), 0, s.GetData(), 0, 4);
+            var temp = new List<Sector>();
+            var s = new Sector(512);
+            Buffer.BlockCopy(BitConverter.GetBytes(1), 0, s.GetData(), 0, 4);
             temp.Add(s);
 
-            StreamView sv = new StreamView(temp, 512, 4, null, a);
-            BinaryReader br = new BinaryReader(sv);
-            Int32 t = br.ReadInt32();
+            var sv = new StreamView(temp, 512, 4, null, a);
+            var br = new BinaryReader(sv);
+            var t = br.ReadInt32();
 
             Assert.IsTrue(t == 1);
         }
@@ -1016,13 +1018,13 @@ namespace OpenMcdf.Test
         public void Test_STREAM_VIEW_2()
         {
             Stream b = null;
-            List<Sector> temp = new List<Sector>();
+            var temp = new List<Sector>();
 
-            StreamView sv = new StreamView(temp, 512, b);
+            var sv = new StreamView(temp, 512, b);
             sv.Write(BitConverter.GetBytes(1), 0, 4);
             sv.Seek(0, SeekOrigin.Begin);
-            BinaryReader br = new BinaryReader(sv);
-            Int32 t = br.ReadInt32();
+            var br = new BinaryReader(sv);
+            var t = br.ReadInt32();
 
             Assert.IsTrue(t == 1);
         }
@@ -1036,21 +1038,21 @@ namespace OpenMcdf.Test
         public void Test_STREAM_VIEW_3()
         {
             Stream b = null;
-            List<Sector> temp = new List<Sector>();
+            var temp = new List<Sector>();
 
-            StreamView sv = new StreamView(temp, 512, b);
+            var sv = new StreamView(temp, 512, b);
 
-            for (int i = 0; i < 200; i++)
+            for (var i = 0; i < 200; i++)
             {
                 sv.Write(BitConverter.GetBytes(i), 0, 4);
             }
 
             sv.Seek(0, SeekOrigin.Begin);
-            BinaryReader br = new BinaryReader(sv);
+            var br = new BinaryReader(sv);
 
-            for (int i = 0; i < 200; i++)
+            for (var i = 0; i < 200; i++)
             {
-                Assert.IsTrue(i == br.ReadInt32(), "Failed with " + i.ToString());
+                Assert.IsTrue(i == br.ReadInt32(), "Failed with " + i);
             }
         }
 
@@ -1062,21 +1064,21 @@ namespace OpenMcdf.Test
         public void Test_STREAM_VIEW_LARGE_DATA()
         {
             Stream b = null;
-            List<Sector> temp = new List<Sector>();
+            var temp = new List<Sector>();
 
-            StreamView sv = new StreamView(temp, 512, b);
+            var sv = new StreamView(temp, 512, b);
 
-            for (int i = 0; i < 200; i++)
+            for (var i = 0; i < 200; i++)
             {
                 sv.Write(BitConverter.GetBytes(i), 0, 4);
             }
 
             sv.Seek(0, SeekOrigin.Begin);
-            BinaryReader br = new BinaryReader(sv);
+            var br = new BinaryReader(sv);
 
-            for (int i = 0; i < 200; i++)
+            for (var i = 0; i < 200; i++)
             {
-                Assert.IsTrue(i == br.ReadInt32(), "Failed with " + i.ToString());
+                Assert.IsTrue(i == br.ReadInt32(), "Failed with " + i);
             }
         }
 
@@ -1089,23 +1091,23 @@ namespace OpenMcdf.Test
         {
             try
             {
-                CompoundFile cf = new CompoundFile("report.xls", CFSUpdateMode.ReadOnly, CFSConfiguration.Default);
+                var cf = new CompoundFile("report.xls", CfsUpdateMode.ReadOnly, CfsConfiguration.Default);
                 cf.RootStorage.RenameItem("Workbook", "Workbuk");
 
                 cf.Save("report_n.xls");
                 cf.Close();
 
-                CompoundFile cf2 = new CompoundFile("report_n.xls", CFSUpdateMode.Update, CFSConfiguration.Default);
+                var cf2 = new CompoundFile("report_n.xls", CfsUpdateMode.Update, CfsConfiguration.Default);
                 cf2.RootStorage.RenameItem("Workbuk", "Workbook");
                 cf2.Commit();
                 cf2.Close();
 
-                CompoundFile cf3 = new CompoundFile("MultipleStorage.cfs", CFSUpdateMode.Update, CFSConfiguration.Default);
+                var cf3 = new CompoundFile("MultipleStorage.cfs", CfsUpdateMode.Update, CfsConfiguration.Default);
                 cf3.RootStorage.RenameItem("MyStorage", "MyNewStorage");
                 cf3.Commit();
                 cf3.Close();
 
-                CompoundFile cf4 = new CompoundFile("MultipleStorage.cfs", CFSUpdateMode.Update, CFSConfiguration.Default);
+                var cf4 = new CompoundFile("MultipleStorage.cfs", CfsUpdateMode.Update, CfsConfiguration.Default);
                 cf4.RootStorage.RenameItem("MyNewStorage", "MyStorage");
                 cf4.Commit();
                 cf4.Close();

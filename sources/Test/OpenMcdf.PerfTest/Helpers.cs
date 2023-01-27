@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace OpenMcdf.PerfTest
 {
@@ -8,16 +6,16 @@ namespace OpenMcdf.PerfTest
     {
         public static byte[] GetBuffer(int count)
         {
-            Random r = new Random();
-            byte[] b = new byte[count];
+            var r = new Random();
+            var b = new byte[count];
             r.NextBytes(b);
             return b;
         }
 
         public static byte[] GetBuffer(int count, byte c)
         {
-            byte[] b = new byte[count];
-            for (int i = 0; i < b.Length; i++)
+            var b = new byte[count];
+            for (var i = 0; i < b.Length; i++)
             {
                 b[i] = c;
             }
@@ -39,7 +37,7 @@ namespace OpenMcdf.PerfTest
             if (b.Length != p.Length)
                 return false;
 
-            for (int i = 0; i < b.Length; i++)
+            for (var i = 0; i < b.Length; i++)
             {
                 if (b[i] != p[i])
                     return false;

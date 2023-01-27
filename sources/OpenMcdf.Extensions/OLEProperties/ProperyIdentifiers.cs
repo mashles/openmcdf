@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace OpenMcdf.Extensions.OLEProperties
 {
@@ -18,7 +17,7 @@ namespace OpenMcdf.Extensions.OLEProperties
     public static class CommonIdentifiers
     {
 
-        public static Dictionary<uint, string> PropertyIdentifiersSummaryInfo = new Dictionary<uint, string>()
+        public static Dictionary<uint, string> PropertyIdentifiersSummaryInfo = new Dictionary<uint, string>
         {
             {0x00000001,"CodePageString" },
             {0x00000002,"PIDSI_TITLE" },
@@ -40,7 +39,7 @@ namespace OpenMcdf.Extensions.OLEProperties
             {0x00000013,"PIDSI_DOC_SECURITY" }
         };
 
-        public static Dictionary<uint, string> PropertyIdentifiersDocumentSummaryInfo = new Dictionary<uint, string>()
+        public static Dictionary<uint, string> PropertyIdentifiersDocumentSummaryInfo = new Dictionary<uint, string>
         {
             {0x00000001,"CodePageString" },
             {0x00000002,"PIDDSI_CATEGORY" },
@@ -64,30 +63,30 @@ namespace OpenMcdf.Extensions.OLEProperties
 
     public static class Extensions
     {
-        public static String GetDescription(this uint identifier, ContainerType map, Dictionary<uint, string> customDict = null)
+        public static string GetDescription(this uint identifier, ContainerType map, Dictionary<uint, string> customDict = null)
         {
-            Dictionary<uint, string> NameDictionary = new Dictionary<uint, string>();
+            var nameDictionary = new Dictionary<uint, string>();
 
             if (customDict == null)
             {
                 switch (map)
                 {
                     case ContainerType.SummaryInfo:
-                        NameDictionary = CommonIdentifiers.PropertyIdentifiersSummaryInfo;
+                        nameDictionary = CommonIdentifiers.PropertyIdentifiersSummaryInfo;
                         break;
                     case ContainerType.DocumentSummaryInfo:
-                        NameDictionary = CommonIdentifiers.PropertyIdentifiersDocumentSummaryInfo;
+                        nameDictionary = CommonIdentifiers.PropertyIdentifiersDocumentSummaryInfo;
                         break;
                 }
             }
             else
             {
-                NameDictionary = customDict;
+                nameDictionary = customDict;
             }
 
-            if (NameDictionary.ContainsKey(identifier))
+            if (nameDictionary.ContainsKey(identifier))
             {
-                return NameDictionary[identifier];
+                return nameDictionary[identifier];
             }
 
             return "0x" + identifier.ToString("x8");

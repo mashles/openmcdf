@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
+﻿using System.IO;
 
 namespace OpenMcdf.Extensions
 {
-    public static class CFStreamExtension
+    public static class CfStreamExtension
     {
 
 
@@ -15,7 +12,7 @@ namespace OpenMcdf.Extensions
         /// </summary>
         /// <param name="cfStream">Current <see cref="T:OpenMcdf.CFStream">CFStream</see> object</param>
         /// <returns>A <see cref="T:System.IO.Stream">Stream</see> object representing structured stream data</returns>
-        public static Stream AsIOStream(this CFStream cfStream)
+        public static Stream AsIoStream(this CfStream cfStream)
         {
             return new StreamDecorator(cfStream);
         }

@@ -15,25 +15,24 @@ namespace OpenMcdf
     /// OpenMCDF base exception.
     /// </summary>
     [Serializable]
-    public class CFException : Exception
+    public class CfException : Exception
     {
-        public CFException()
-            : base()
+        public CfException()
         {
         }
 
-        protected CFException(SerializationInfo info, StreamingContext context)
+        protected CfException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
 
-        public CFException(string message)
+        public CfException(string message)
             : base(message, null)
         {
 
         }
 
-        public CFException(string message, Exception innerException)
+        public CfException(string message, Exception innerException)
             : base(message, innerException)
         {
 
@@ -47,25 +46,24 @@ namespace OpenMcdf
     /// compound file object.
     /// </summary>
     [Serializable]
-    public class CFDisposedException : CFException
+    public class CfDisposedException : CfException
     {
-        public CFDisposedException()
-            : base()
+        public CfDisposedException()
         {
         }
 
-        protected CFDisposedException(SerializationInfo info, StreamingContext context)
+        protected CfDisposedException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
 
-        public CFDisposedException(string message)
+        public CfDisposedException(string message)
             : base(message, null)
         {
 
         }
 
-        public CFDisposedException(string message, Exception innerException)
+        public CfDisposedException(string message, Exception innerException)
             : base(message, innerException)
         {
 
@@ -78,25 +76,24 @@ namespace OpenMcdf
     /// or not supported COM/OLE Structured storage version.
     /// </summary>
     [Serializable]
-    public class CFFileFormatException : CFException
+    public class CfFileFormatException : CfException
     {
-        public CFFileFormatException()
-            : base()
+        public CfFileFormatException()
         {
         }
 
-        protected CFFileFormatException(SerializationInfo info, StreamingContext context)
+        protected CfFileFormatException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
 
-        public CFFileFormatException(string message)
+        public CfFileFormatException(string message)
             : base(message, null)
         {
 
         }
 
-        public CFFileFormatException(string message, Exception innerException)
+        public CfFileFormatException(string message, Exception innerException)
             : base(message, innerException)
         {
 
@@ -109,25 +106,25 @@ namespace OpenMcdf
     /// are not found in a parent storage.
     /// </summary>
     [Serializable]
-    public class CFItemNotFound : CFException
+    public class CfItemNotFound : CfException
     {
-        protected CFItemNotFound(SerializationInfo info, StreamingContext context)
+        protected CfItemNotFound(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
 
-        public CFItemNotFound()
+        public CfItemNotFound()
             : base("Entry not found")
         {
         }
 
-        public CFItemNotFound(string message)
+        public CfItemNotFound(string message)
             : base(message, null)
         {
 
         }
 
-        public CFItemNotFound(string message, Exception innerException)
+        public CfItemNotFound(string message, Exception innerException)
             : base(message, innerException)
         {
 
@@ -139,25 +136,24 @@ namespace OpenMcdf
     /// Raised when a method call is invalid for the current object state
     /// </summary>
     [Serializable]
-    public class CFInvalidOperation : CFException
+    public class CfInvalidOperation : CfException
     {
-         public CFInvalidOperation()
-            : base()
-        {
+         public CfInvalidOperation()
+         {
         }
 
-        protected CFInvalidOperation(SerializationInfo info, StreamingContext context)
+        protected CfInvalidOperation(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
 
-        public CFInvalidOperation(string message)
+        public CfInvalidOperation(string message)
             : base(message, null)
         {
 
         }
 
-        public CFInvalidOperation(string message, Exception innerException)
+        public CfInvalidOperation(string message, Exception innerException)
             : base(message, innerException)
         {
 
@@ -174,25 +170,24 @@ namespace OpenMcdf
     /// the same storage or sub-storage. 
     /// </remarks>
     [Serializable]
-    public class CFDuplicatedItemException : CFException
+    public class CfDuplicatedItemException : CfException
     {
-        public CFDuplicatedItemException()
-            : base()
+        public CfDuplicatedItemException()
         {
         }
 
-        protected CFDuplicatedItemException(SerializationInfo info, StreamingContext context)
+        protected CfDuplicatedItemException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
 
-        public CFDuplicatedItemException(string message)
+        public CfDuplicatedItemException(string message)
             : base(message, null)
         {
 
         }
 
-        public CFDuplicatedItemException(string message, Exception innerException)
+        public CfDuplicatedItemException(string message, Exception innerException)
             : base(message, innerException)
         {
 
@@ -206,25 +201,24 @@ namespace OpenMcdf
     /// This exception is NOT raised when Compound file has been opened with NO_VALIDATION_EXCEPTION option.
     /// </remarks>
     [Serializable]
-    public class CFCorruptedFileException : CFException
+    public class CfCorruptedFileException : CfException
     {
-        public CFCorruptedFileException()
-            : base()
+        public CfCorruptedFileException()
         {
         }
 
-        protected CFCorruptedFileException(SerializationInfo info, StreamingContext context)
+        protected CfCorruptedFileException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
 
-        public CFCorruptedFileException(string message)
+        public CfCorruptedFileException(string message)
             : base(message, null)
         {
 
         }
 
-        public CFCorruptedFileException(string message, Exception innerException)
+        public CfCorruptedFileException(string message, Exception innerException)
             : base(message, innerException)
         {
 

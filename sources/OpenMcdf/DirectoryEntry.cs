@@ -8,12 +8,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
+using System.Text;
+using RedBlackTree;
 
 namespace OpenMcdf
 {
-    public enum StgType : int
+    public enum StgType
     {
         StgInvalid = 0,
         StgStorage = 1,
@@ -23,7 +24,7 @@ namespace OpenMcdf
         StgRoot = 5
     }
 
-    public enum StgColor : int
+    public enum StgColor
     {
         Red = 0,
         Black = 1
@@ -31,76 +32,70 @@ namespace OpenMcdf
 
     internal class DirectoryEntry : IDirectoryEntry
     {
-        internal const int THIS_IS_GREATER = 1;
-        internal const int OTHER_IS_GREATER = -1;
-        private IList<IDirectoryEntry> dirRepository;
+        internal const int ThisIsGreater = 1;
+        internal const int OtherIsGreater = -1;
+        private readonly IList<IDirectoryEntry> _dirRepository;
 
-        private int sid = -1;
-        public int SID
+        private int _sid = -1;
+        public int Sid
         {
-            get { return sid; }
-            set { sid = value; }
+            get => _sid;
+            set => _sid = value;
         }
 
-        internal static Int32 NOSTREAM
+        internal static int Nostream
             = unchecked((int)0xFFFFFFFF);
 
-        internal static Int32 ZERO
+        internal static int Zero
             = 0;
 
-        private DirectoryEntry(String name, StgType stgType, IList<IDirectoryEntry> dirRepository)
+        private DirectoryEntry(string name, StgType stgType, IList<IDirectoryEntry> dirRepository)
         {
-            this.dirRepository = dirRepository;
+            _dirRepository = dirRepository;
 
-            this.stgType = stgType;
+            _stgType = stgType;
 
             if (stgType == StgType.StgStorage)
             {
-                this.creationDate = BitConverter.GetBytes((DateTime.Now.ToFileTime()));
-                this.StartSetc = ZERO;
+                _creationDate = BitConverter.GetBytes((DateTime.Now.ToFileTime()));
+                StartSetc = Zero;
             }
 
             if (stgType == StgType.StgInvalid)
             {
-                this.StartSetc = ZERO;
+                StartSetc = Zero;
             }
 
-            if (name != String.Empty)
+            if (name != string.Empty)
             {
-                this.SetEntryName(name);
+                SetEntryName(name);
             }
         }
 
-        private byte[] entryName = new byte[64];
+        private byte[] _entryName = new byte[64];
 
-        public byte[] EntryName
+        public byte[] EntryName => _entryName;
+
+        //set
+        //{
+        //    entryName = value;
+        //}
+        public string GetEntryName()
         {
-            get
+            if (_entryName != null && _entryName.Length > 0)
             {
-                return entryName;
+                return Encoding.Unicode.GetString(_entryName).Remove((NameLength - 1) / 2);
             }
-            //set
-            //{
-            //    entryName = value;
-            //}
+
+            return string.Empty;
         }
 
-        public String GetEntryName()
+        public void SetEntryName(string entryName)
         {
-            if (entryName != null && entryName.Length > 0)
+            if (entryName == string.Empty)
             {
-                return Encoding.Unicode.GetString(entryName).Remove((this.nameLength - 1) / 2);
-            }
-            else
-                return String.Empty;
-        }
-
-        public void SetEntryName(String entryName)
-        {
-            if (entryName == String.Empty)
-            {
-                this.entryName = new byte[64];
-                this.nameLength = 0;
+                _entryName = new byte[64];
+                NameLength = 0;
             }
             else
             {
@@ -111,205 +106,150 @@ namespace OpenMcdf
                     entryName.Contains(@"!")
 
                     )
-                    throw new CFException("Invalid character in entry: the characters '\\', '/', ':','!' cannot be used in entry name");
+                    throw new CfException("Invalid character in entry: the characters '\\', '/', ':','!' cannot be used in entry name");
 
                 if (entryName.Length > 31)
-                    throw new CFException("Entry name MUST NOT exceed 31 characters");
+                    throw new CfException("Entry name MUST NOT exceed 31 characters");
 
 
 
                 byte[] newName = null;
-                byte[] temp = Encoding.Unicode.GetBytes(entryName);
+                var temp = Encoding.Unicode.GetBytes(entryName);
                 newName = new byte[64];
                 Buffer.BlockCopy(temp, 0, newName, 0, temp.Length);
                 newName[temp.Length] = 0x00;
                 newName[temp.Length + 1] = 0x00;
 
-                this.entryName = newName;
-                this.nameLength = (ushort)(temp.Length + 2);
+                _entryName = newName;
+                NameLength = (ushort)(temp.Length + 2);
             }
         }
 
-        private ushort nameLength;
-        public ushort NameLength
-        {
-            get
-            {
-                return nameLength;
-            }
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public ushort NameLength { get; set; }
 
-        private StgType stgType = StgType.StgInvalid;
+        private StgType _stgType = StgType.StgInvalid;
         public StgType StgType
         {
-            get
-            {
-                return stgType;
-            }
-            set
-            {
-                stgType = value;
-            }
+            get => _stgType;
+            set => _stgType = value;
         }
-        private StgColor stgColor = StgColor.Red;
+        private StgColor _stgColor = StgColor.Red;
 
         public StgColor StgColor
         {
-            get
-            {
-                return stgColor;
-            }
-            set
-            {
-                stgColor = value;
-            }
+            get => _stgColor;
+            set => _stgColor = value;
         }
 
-        private Int32 leftSibling = NOSTREAM;
-        public Int32 LeftSibling
+        private int _leftSibling = Nostream;
+        public int LeftSibling
         {
-            get { return leftSibling; }
-            set { leftSibling = value; }
+            get => _leftSibling;
+            set => _leftSibling = value;
         }
 
-        private Int32 rightSibling = NOSTREAM;
-        public Int32 RightSibling
+        private int _rightSibling = Nostream;
+        public int RightSibling
         {
-            get { return rightSibling; }
-            set { rightSibling = value; }
+            get => _rightSibling;
+            set => _rightSibling = value;
         }
 
-        private Int32 child = NOSTREAM;
-        public Int32 Child
+        private int _child = Nostream;
+        public int Child
         {
-            get { return child; }
-            set { child = value; }
+            get => _child;
+            set => _child = value;
         }
 
-        private Guid storageCLSID
+        private Guid _storageClsid
             = Guid.Empty;
 
-        public Guid StorageCLSID
+        public Guid StorageClsid
         {
-            get
-            {
-                return storageCLSID;
-            }
-            set
-            {
-                this.storageCLSID = value;
-            }
+            get => _storageClsid;
+            set => _storageClsid = value;
         }
 
 
-        private Int32 stateBits;
+        private int _stateBits;
 
-        public Int32 StateBits
+        public int StateBits
         {
-            get { return stateBits; }
-            set { stateBits = value; }
+            get => _stateBits;
+            set => _stateBits = value;
         }
 
-        private byte[] creationDate = new byte[8] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        private byte[] _creationDate = new byte[8] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
         public byte[] CreationDate
         {
-            get
-            {
-                return creationDate;
-            }
-            set
-            {
-                creationDate = value;
-            }
+            get => _creationDate;
+            set => _creationDate = value;
         }
 
-        private byte[] modifyDate = new byte[8] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        private byte[] _modifyDate = new byte[8] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
         public byte[] ModifyDate
         {
-            get
-            {
-                return modifyDate;
-            }
-            set
-            {
-                modifyDate = value;
-            }
+            get => _modifyDate;
+            set => _modifyDate = value;
         }
 
-        private Int32 startSetc = Sector.ENDOFCHAIN;
-        public Int32 StartSetc
+        private int _startSetc = Sector.Endofchain;
+        public int StartSetc
         {
-            get
-            {
-                return startSetc;
-            }
-            set
-            {
-                startSetc = value;
-            }
+            get => _startSetc;
+            set => _startSetc = value;
         }
-        private long size;
+        private long _size;
         public long Size
         {
-            get
-            {
-                return size;
-            }
-            set
-            {
-                size = value;
-            }
+            get => _size;
+            set => _size = value;
         }
 
 
         public int CompareTo(object obj)
         {
 
-            IDirectoryEntry otherDir = obj as IDirectoryEntry;
+            var otherDir = obj as IDirectoryEntry;
 
             if (otherDir == null)
-                throw new CFException("Invalid casting: compared object does not implement IDirectorEntry interface");
+                throw new CfException("Invalid casting: compared object does not implement IDirectorEntry interface");
 
-            if (this.NameLength > otherDir.NameLength)
+            if (NameLength > otherDir.NameLength)
             {
-                return THIS_IS_GREATER;
+                return ThisIsGreater;
             }
-            else if (this.NameLength < otherDir.NameLength)
+
+            if (NameLength < otherDir.NameLength)
             {
-                return OTHER_IS_GREATER;
+                return OtherIsGreater;
             }
-            else
+
+            var thisName = Encoding.Unicode.GetString(EntryName, 0, NameLength);
+            var otherName = Encoding.Unicode.GetString(otherDir.EntryName, 0, otherDir.NameLength);
+
+            for (var z = 0; z < thisName.Length; z++)
             {
-                String thisName = Encoding.Unicode.GetString(this.EntryName, 0, this.NameLength);
-                String otherName = Encoding.Unicode.GetString(otherDir.EntryName, 0, otherDir.NameLength);
+                var thisChar = char.ToUpperInvariant(thisName[z]);
+                var otherChar = char.ToUpperInvariant(otherName[z]);
 
-                for (int z = 0; z < thisName.Length; z++)
-                {
-                    char thisChar = char.ToUpperInvariant(thisName[z]);
-                    char otherChar = char.ToUpperInvariant(otherName[z]);
-
-                    if (thisChar > otherChar)
-                        return THIS_IS_GREATER;
-                    else if (thisChar < otherChar)
-                        return OTHER_IS_GREATER;
-                }
-
-                return 0;
-
+                if (thisChar > otherChar)
+                    return ThisIsGreater;
+                if (thisChar < otherChar)
+                    return OtherIsGreater;
             }
+
+            return 0;
 
             //   return String.Compare(Encoding.Unicode.GetString(this.EntryName).ToUpper(), Encoding.Unicode.GetString(other.EntryName).ToUpper());
         }
 
         public override bool Equals(object obj)
         {
-            return this.CompareTo(obj) == 0;
+            return CompareTo(obj) == 0;
         }
 
         /// <summary>
@@ -331,26 +271,26 @@ namespace OpenMcdf
 
         public override int GetHashCode()
         {
-            return (int)fnv_hash(this.entryName);
+            return (int)fnv_hash(_entryName);
         }
 
         public void Write(Stream stream)
         {
-            StreamRW rw = new StreamRW(stream);
+            var rw = new StreamRw(stream);
 
-            rw.Write(entryName);
-            rw.Write(nameLength);
-            rw.Write((byte)stgType);
-            rw.Write((byte)stgColor);
-            rw.Write(leftSibling);
-            rw.Write(rightSibling);
-            rw.Write(child);
-            rw.Write(storageCLSID.ToByteArray());
-            rw.Write(stateBits);
-            rw.Write(creationDate);
-            rw.Write(modifyDate);
-            rw.Write(startSetc);
-            rw.Write(size);
+            rw.Write(_entryName);
+            rw.Write(NameLength);
+            rw.Write((byte)_stgType);
+            rw.Write((byte)_stgColor);
+            rw.Write(_leftSibling);
+            rw.Write(_rightSibling);
+            rw.Write(_child);
+            rw.Write(_storageClsid.ToByteArray());
+            rw.Write(_stateBits);
+            rw.Write(_creationDate);
+            rw.Write(_modifyDate);
+            rw.Write(_startSetc);
+            rw.Write(_size);
 
             rw.Close();
         }
@@ -382,136 +322,120 @@ namespace OpenMcdf
         //    return ms.ToArray();
         //}
 
-        public void Read(Stream stream, CFSVersion ver = CFSVersion.Ver_3)
+        public void Read(Stream stream, CfsVersion ver = CfsVersion.Ver3)
         {
-            StreamRW rw = new StreamRW(stream);
+            var rw = new StreamRw(stream);
 
-            entryName = rw.ReadBytes(64);
-            nameLength = rw.ReadUInt16();
-            stgType = (StgType)rw.ReadByte();
+            _entryName = rw.ReadBytes(64);
+            NameLength = rw.ReadUInt16();
+            _stgType = (StgType)rw.ReadByte();
             //rw.ReadByte();//Ignore color, only black tree
-            stgColor = (StgColor)rw.ReadByte();
-            leftSibling = rw.ReadInt32();
-            rightSibling = rw.ReadInt32();
-            child = rw.ReadInt32();
+            _stgColor = (StgColor)rw.ReadByte();
+            _leftSibling = rw.ReadInt32();
+            _rightSibling = rw.ReadInt32();
+            _child = rw.ReadInt32();
 
             // Thanks to bugaccount (BugTrack id 3519554)
-            if (stgType == StgType.StgInvalid)
+            if (_stgType == StgType.StgInvalid)
             {
-                leftSibling = NOSTREAM;
-                rightSibling = NOSTREAM;
-                child = NOSTREAM;
+                _leftSibling = Nostream;
+                _rightSibling = Nostream;
+                _child = Nostream;
             }
 
-            storageCLSID = new Guid(rw.ReadBytes(16));
-            stateBits = rw.ReadInt32();
-            creationDate = rw.ReadBytes(8);
-            modifyDate = rw.ReadBytes(8);
-            startSetc = rw.ReadInt32();
+            _storageClsid = new Guid(rw.ReadBytes(16));
+            _stateBits = rw.ReadInt32();
+            _creationDate = rw.ReadBytes(8);
+            _modifyDate = rw.ReadBytes(8);
+            _startSetc = rw.ReadInt32();
 
-            if (ver == CFSVersion.Ver_3)
+            if (ver == CfsVersion.Ver3)
             {
                 // avoid dirty read for version 3 files (max size: 32bit integer)
                 // where most significant bits are not initialized to zero
 
-                size = rw.ReadInt32();
+                _size = rw.ReadInt32();
                 rw.ReadBytes(4); //discard most significant 4 (possibly) dirty bytes
             }
             else
             {
-                size = rw.ReadInt64();
+                _size = rw.ReadInt64();
             }
         }
 
-        public string Name
-        {
-            get { return GetEntryName(); }
-        }
+        public string Name => GetEntryName();
 
 
-        public RedBlackTree.IRBNode Left
+        public IRbNode Left
         {
             get
             {
-                if (leftSibling == DirectoryEntry.NOSTREAM)
+                if (_leftSibling == Nostream)
                     return null;
 
-                return dirRepository[leftSibling];
+                return _dirRepository[_leftSibling];
             }
             set
             {
-                leftSibling = value != null ? ((IDirectoryEntry)value).SID : DirectoryEntry.NOSTREAM;
+                _leftSibling = value != null ? ((IDirectoryEntry)value).Sid : Nostream;
 
-                if (leftSibling != DirectoryEntry.NOSTREAM)
-                    dirRepository[leftSibling].Parent = this;
+                if (_leftSibling != Nostream)
+                    _dirRepository[_leftSibling].Parent = this;
             }
         }
 
-        public RedBlackTree.IRBNode Right
+        public IRbNode Right
         {
             get
             {
-                if (rightSibling == DirectoryEntry.NOSTREAM)
+                if (_rightSibling == Nostream)
                     return null;
 
-                return dirRepository[rightSibling];
+                return _dirRepository[_rightSibling];
             }
             set
             {
 
-                rightSibling = value != null ? ((IDirectoryEntry)value).SID : DirectoryEntry.NOSTREAM;
+                _rightSibling = value != null ? ((IDirectoryEntry)value).Sid : Nostream;
 
-                if (rightSibling != DirectoryEntry.NOSTREAM)
-                    dirRepository[rightSibling].Parent = this;
+                if (_rightSibling != Nostream)
+                    _dirRepository[_rightSibling].Parent = this;
 
             }
         }
 
-        public RedBlackTree.Color Color
+        public Color Color
         {
-            get
-            {
-                return (RedBlackTree.Color)StgColor;
-            }
-            set
-            {
-                StgColor = (StgColor)value;
-            }
+            get => (Color)StgColor;
+            set => StgColor = (StgColor)value;
         }
 
-        private IDirectoryEntry parent = null;
+        private IDirectoryEntry _parent;
 
-        public RedBlackTree.IRBNode Parent
+        public IRbNode Parent
         {
-            get
-            {
-                return parent;
-            }
-            set
-            {
-                parent = value as IDirectoryEntry;
-            }
+            get => _parent;
+            set => _parent = value as IDirectoryEntry;
         }
 
-        public RedBlackTree.IRBNode Grandparent()
+        public IRbNode Grandparent()
         {
-            return parent != null ? parent.Parent : null;
+            return _parent != null ? _parent.Parent : null;
         }
 
-        public RedBlackTree.IRBNode Sibling()
+        public IRbNode Sibling()
         {
             if (this == Parent.Left)
                 return Parent.Right;
-            else
-                return Parent.Left;
+            return Parent.Left;
         }
 
-        public RedBlackTree.IRBNode Uncle()
+        public IRbNode Uncle()
         {
-            return parent != null ? Parent.Sibling() : null;
+            return _parent != null ? Parent.Sibling() : null;
         }
 
-        internal static IDirectoryEntry New(String name, StgType stgType, IList<IDirectoryEntry> dirRepository)
+        internal static IDirectoryEntry New(string name, StgType stgType, IList<IDirectoryEntry> dirRepository)
         {
             DirectoryEntry de = null;
             if (dirRepository != null)
@@ -519,7 +443,7 @@ namespace OpenMcdf
                 de = new DirectoryEntry(name, stgType, dirRepository);
                 // No invalid directory entry found
                 dirRepository.Add(de);
-                de.SID = dirRepository.Count - 1;
+                de.Sid = dirRepository.Count - 1;
             }
             else
                 throw new ArgumentNullException("dirRepository", "Directory repository cannot be null in New() method");
@@ -527,28 +451,28 @@ namespace OpenMcdf
             return de;
         }
 
-        internal static IDirectoryEntry Mock(String name, StgType stgType)
+        internal static IDirectoryEntry Mock(string name, StgType stgType)
         {
-            DirectoryEntry de = new DirectoryEntry(name, stgType, null);
+            var de = new DirectoryEntry(name, stgType, null);
 
             return de;
         }
 
-        internal static IDirectoryEntry TryNew(String name, StgType stgType, IList<IDirectoryEntry> dirRepository)
+        internal static IDirectoryEntry TryNew(string name, StgType stgType, IList<IDirectoryEntry> dirRepository)
         {
-            DirectoryEntry de = new DirectoryEntry(name, stgType, dirRepository);
+            var de = new DirectoryEntry(name, stgType, dirRepository);
 
             // If we are not adding an invalid dirEntry as
             // in a normal loading from file (invalid dirs MAY pad a sector)
             if (de != null)
             {
                 // Find first available invalid slot (if any) to reuse it
-                for (int i = 0; i < dirRepository.Count; i++)
+                for (var i = 0; i < dirRepository.Count; i++)
                 {
                     if (dirRepository[i].StgType == StgType.StgInvalid)
                     {
                         dirRepository[i] = de;
-                        de.SID = i;
+                        de.Sid = i;
                         return de;
                     }
                 }
@@ -556,7 +480,7 @@ namespace OpenMcdf
 
             // No invalid directory entry found
             dirRepository.Add(de);
-            de.SID = dirRepository.Count - 1;
+            de.Sid = dirRepository.Count - 1;
 
             return de;
         }
@@ -566,28 +490,28 @@ namespace OpenMcdf
 
         public override string ToString()
         {
-            return this.Name + " [" + this.sid + "]" + (this.stgType == StgType.StgStream ? "Stream" : "Storage");
+            return Name + " [" + _sid + "]" + (_stgType == StgType.StgStream ? "Stream" : "Storage");
         }
 
 
-        public void AssignValueTo(RedBlackTree.IRBNode other)
+        public void AssignValueTo(IRbNode other)
         {
-            DirectoryEntry d = other as DirectoryEntry;
+            var d = other as DirectoryEntry;
 
-            d.SetEntryName(this.GetEntryName());
+            d.SetEntryName(GetEntryName());
 
-            d.creationDate = new byte[this.creationDate.Length];
-            this.creationDate.CopyTo(d.creationDate, 0);
+            d._creationDate = new byte[_creationDate.Length];
+            _creationDate.CopyTo(d._creationDate, 0);
 
-            d.modifyDate = new byte[this.modifyDate.Length];
-            this.modifyDate.CopyTo(d.modifyDate, 0);
+            d._modifyDate = new byte[_modifyDate.Length];
+            _modifyDate.CopyTo(d._modifyDate, 0);
 
-            d.size = this.size;
-            d.startSetc = this.startSetc;
-            d.stateBits = this.stateBits;
-            d.stgType = this.stgType;
-            d.storageCLSID = new Guid(this.storageCLSID.ToByteArray());
-            d.Child = this.Child;
+            d._size = _size;
+            d._startSetc = _startSetc;
+            d._stateBits = _stateBits;
+            d._stgType = _stgType;
+            d._storageClsid = new Guid(_storageClsid.ToByteArray());
+            d.Child = Child;
         }
     }
 }

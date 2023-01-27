@@ -35,46 +35,43 @@ namespace OpenMcdf
     /// 
     /// </code>
     /// </example>
-    public abstract class CFItem : IComparable<CFItem>
+    public abstract class CfItem : IComparable<CfItem>
     {
-        private CompoundFile compoundFile;
+        private readonly CompoundFile _compoundFile;
 
-        protected CompoundFile CompoundFile
-        {
-            get { return compoundFile; }
-        }
+        protected CompoundFile CompoundFile => _compoundFile;
 
         protected void CheckDisposed()
         {
-            if (compoundFile.IsClosed)
-                throw new CFDisposedException("Owner Compound file has been closed and owned items have been invalidated");
+            if (_compoundFile.IsClosed)
+                throw new CfDisposedException("Owner Compound file has been closed and owned items have been invalidated");
         }
 
-        protected CFItem()
+        protected CfItem()
         {
         }
 
-        protected CFItem(CompoundFile compoundFile)
+        protected CfItem(CompoundFile compoundFile)
         {
-            this.compoundFile = compoundFile;
+            _compoundFile = compoundFile;
         }
 
         #region IDirectoryEntry Members
 
-        private IDirectoryEntry dirEntry;
+        private IDirectoryEntry _dirEntry;
 
         internal IDirectoryEntry DirEntry
         {
-            get { return dirEntry; }
-            set { dirEntry = value; }
+            get => _dirEntry;
+            set => _dirEntry = value;
         }
 
 
 
-        internal int CompareTo(CFItem other)
+        internal int CompareTo(CfItem other)
         {
 
-            return this.dirEntry.CompareTo(other.DirEntry);
+            return _dirEntry.CompareTo(other.DirEntry);
         }
 
 
@@ -84,15 +81,15 @@ namespace OpenMcdf
 
         public int CompareTo(object obj)
         {
-            return this.dirEntry.CompareTo(((CFItem)obj).DirEntry);
+            return _dirEntry.CompareTo(((CfItem)obj).DirEntry);
         }
 
         #endregion
 
-        public static bool operator ==(CFItem leftItem, CFItem rightItem)
+        public static bool operator ==(CfItem leftItem, CfItem rightItem)
         {
             // If both are null, or both are same instance, return true.
-            if (System.Object.ReferenceEquals(leftItem, rightItem))
+            if (ReferenceEquals(leftItem, rightItem))
             {
                 return true;
             }
@@ -107,35 +104,35 @@ namespace OpenMcdf
             return leftItem.CompareTo(rightItem) == 0;
         }
 
-        public static bool operator !=(CFItem leftItem, CFItem rightItem)
+        public static bool operator !=(CfItem leftItem, CfItem rightItem)
         {
             return !(leftItem == rightItem);
         }
 
         public override bool Equals(object obj)
         {
-            return this.CompareTo(obj) == 0;
+            return CompareTo(obj) == 0;
         }
 
         public override int GetHashCode()
         {
-            return this.dirEntry.GetEntryName().GetHashCode();
+            return _dirEntry.GetEntryName().GetHashCode();
         }
 
         /// <summary>
         /// Get entity name
         /// </summary>
-        public String Name
+        public string Name
         {
             get
             {
-                String n = this.dirEntry.GetEntryName();
+                var n = _dirEntry.GetEntryName();
                 if (n != null && n.Length > 0)
                 {
                     return n.TrimEnd('\0');
                 }
-                else
-                    return String.Empty;
+
+                return string.Empty;
             }
 
             
@@ -145,13 +142,7 @@ namespace OpenMcdf
         /// Size in bytes of the item. It has a valid value 
         /// only if entity is a stream, otherwise it is setted to zero.
         /// </summary>
-        public long Size
-        {
-            get
-            {
-                return this.dirEntry.Size;
-            }
-        }
+        public long Size => _dirEntry.Size;
 
 
         /// <summary>
@@ -161,13 +152,7 @@ namespace OpenMcdf
         /// This check doesn't use reflection or runtime type information
         /// and doesn't suffer related performance penalties.
         /// </remarks>
-        public bool IsStorage
-        {
-            get
-            {
-                return this.dirEntry.StgType == StgType.StgStorage;
-            }
-        }
+        public bool IsStorage => _dirEntry.StgType == StgType.StgStorage;
 
         /// <summary>
         /// Return true if item is a Stream
@@ -176,13 +161,7 @@ namespace OpenMcdf
         /// This check doesn't use reflection or runtime type information
         /// and doesn't suffer related performance penalties.
         /// </remarks>
-        public bool IsStream
-        {
-            get
-            {
-                return this.dirEntry.StgType == StgType.StgStream;
-            }
-        }
+        public bool IsStream => _dirEntry.StgType == StgType.StgStream;
 
         /// <summary>
         /// Return true if item is the Root Storage
@@ -191,30 +170,21 @@ namespace OpenMcdf
         /// This check doesn't use reflection or runtime type information
         /// and doesn't suffer related performance penalties.
         /// </remarks>
-        public bool IsRoot
-        {
-            get
-            {
-                return this.dirEntry.StgType == StgType.StgRoot;
-            }
-        }
+        public bool IsRoot => _dirEntry.StgType == StgType.StgRoot;
 
         /// <summary>
         /// Get/Set the Creation Date of the current item
         /// </summary>
         public DateTime CreationDate
         {
-            get
-            {
-                return DateTime.FromFileTime(BitConverter.ToInt64(this.dirEntry.CreationDate, 0));
-            }
+            get => DateTime.FromFileTime(BitConverter.ToInt64(_dirEntry.CreationDate, 0));
 
             set
             {
-                if (this.dirEntry.StgType != StgType.StgStream && this.dirEntry.StgType != StgType.StgRoot)
-                    this.dirEntry.CreationDate = BitConverter.GetBytes((value.ToFileTime()));
+                if (_dirEntry.StgType != StgType.StgStream && _dirEntry.StgType != StgType.StgRoot)
+                    _dirEntry.CreationDate = BitConverter.GetBytes((value.ToFileTime()));
                 else
-                    throw new CFException("Creation Date can only be set on storage entries");
+                    throw new CfException("Creation Date can only be set on storage entries");
             }
         }
 
@@ -223,51 +193,44 @@ namespace OpenMcdf
         /// </summary>
         public DateTime ModifyDate
         {
-            get
-            {
-                return DateTime.FromFileTime(BitConverter.ToInt64(this.dirEntry.ModifyDate, 0));
-            }
+            get => DateTime.FromFileTime(BitConverter.ToInt64(_dirEntry.ModifyDate, 0));
 
             set
             {
-                if (this.dirEntry.StgType != StgType.StgStream && this.dirEntry.StgType != StgType.StgRoot)
-                    this.dirEntry.ModifyDate = BitConverter.GetBytes((value.ToFileTime()));
+                if (_dirEntry.StgType != StgType.StgStream && _dirEntry.StgType != StgType.StgRoot)
+                    _dirEntry.ModifyDate = BitConverter.GetBytes((value.ToFileTime()));
                 else
-                    throw new CFException("Modify Date can only be set on storage entries");
+                    throw new CfException("Modify Date can only be set on storage entries");
             }
         }
 
         /// <summary>
         /// Get/Set Object class Guid for Root and Storage entries.
         /// </summary>
-        public Guid CLSID
+        public Guid Clsid
         {
-            get
-            {
-                return this.dirEntry.StorageCLSID;
-            }
+            get => _dirEntry.StorageClsid;
             set
             {
-                if (this.dirEntry.StgType != StgType.StgStream)
+                if (_dirEntry.StgType != StgType.StgStream)
                 {
-                    this.dirEntry.StorageCLSID = value;
+                    _dirEntry.StorageClsid = value;
                 }
                 else
-                    throw new CFException("Object class GUID can only be set on Root and Storage entries");
+                    throw new CfException("Object class GUID can only be set on Root and Storage entries");
             }
         }
 
-        int IComparable<CFItem>.CompareTo(CFItem other)
+        int IComparable<CfItem>.CompareTo(CfItem other)
         {
-            return this.dirEntry.CompareTo(other.DirEntry);
+            return _dirEntry.CompareTo(other.DirEntry);
         }
 
         public override string ToString()
         {
-            if (this.dirEntry != null)
-                return "[" + this.dirEntry.LeftSibling + "," + this.dirEntry.SID + "," + this.dirEntry.RightSibling + "]" + " " + this.dirEntry.GetEntryName();
-            else
-                return String.Empty;
+            if (_dirEntry != null)
+                return "[" + _dirEntry.LeftSibling + "," + _dirEntry.Sid + "," + _dirEntry.RightSibling + "]" + " " + _dirEntry.GetEntryName();
+            return string.Empty;
         }
     }
 }

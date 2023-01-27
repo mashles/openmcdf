@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Linq;
 
 namespace OpenMcdf.Extensions.Test
 {
@@ -10,15 +9,9 @@ namespace OpenMcdf.Extensions.Test
     /// Summary description for UnitTest1
     /// </summary>
     [TestClass]
-    public class OLEPropertiesExtensionsTest
+    public class OlePropertiesExtensionsTest
     {
-        public OLEPropertiesExtensionsTest()
-        {
-
-        }
-
-
-        private TestContext testContextInstance;
+        private TestContext _testContextInstance;
 
         /// <summary>
         ///Gets or sets the test context which provides
@@ -26,14 +19,8 @@ namespace OpenMcdf.Extensions.Test
         ///</summary>
         public TestContext TestContext
         {
-            get
-            {
-                return testContextInstance;
-            }
-            set
-            {
-                testContextInstance = value;
-            }
+            get => _testContextInstance;
+            set => _testContextInstance = value;
         }
 
         #region Additional test attributes
@@ -61,15 +48,15 @@ namespace OpenMcdf.Extensions.Test
         [TestMethod]
         public void Test_SUMMARY_INFO_READ()
         {
-            using (CompoundFile cf = new CompoundFile("_Test.ppt"))
+            using (var cf = new CompoundFile("_Test.ppt"))
             {
-                var co = cf.RootStorage.GetStream("\u0005SummaryInformation").AsOLEPropertiesContainer();
+                var co = cf.RootStorage.GetStream("\u0005SummaryInformation").AsOlePropertiesContainer();
 
-                foreach (OLEProperties.OLEProperty p in co.Properties)
+                foreach (var p in co.Properties)
                 {
                     Debug.Write(p.PropertyName);
                     Debug.Write(" - ");
-                    Debug.Write(p.VTType);
+                    Debug.Write(p.VtType);
                     Debug.Write(" - ");
                     Debug.WriteLine(p.Value);
                 }
@@ -83,15 +70,15 @@ namespace OpenMcdf.Extensions.Test
         [TestMethod]
         public void Test_DOCUMENT_SUMMARY_INFO_READ()
         {
-            using (CompoundFile cf = new CompoundFile("_Test.ppt"))
+            using (var cf = new CompoundFile("_Test.ppt"))
             {
-                var co = cf.RootStorage.GetStream("\u0005DocumentSummaryInformation").AsOLEPropertiesContainer();
+                var co = cf.RootStorage.GetStream("\u0005DocumentSummaryInformation").AsOlePropertiesContainer();
 
-                foreach (OLEProperties.OLEProperty p in co.Properties)
+                foreach (var p in co.Properties)
                 {
                     Debug.Write(p.PropertyName);
                     Debug.Write(" - ");
-                    Debug.Write(p.VTType);
+                    Debug.Write(p.VtType);
                     Debug.Write(" - ");
                     Debug.WriteLine(p.Value);
                 }
@@ -109,10 +96,10 @@ namespace OpenMcdf.Extensions.Test
             if (File.Exists("test1.cfs"))
                 File.Delete("test1.cfs");
 
-            using (CompoundFile cf = new CompoundFile("_Test.ppt"))
+            using (var cf = new CompoundFile("_Test.ppt"))
             {
-                var co = cf.RootStorage.GetStream("\u0005DocumentSummaryInformation").AsOLEPropertiesContainer();
-                using (CompoundFile cf2 = new CompoundFile())
+                var co = cf.RootStorage.GetStream("\u0005DocumentSummaryInformation").AsOlePropertiesContainer();
+                using (var cf2 = new CompoundFile())
                 {
                     cf2.RootStorage.AddStream("\u0005DocumentSummaryInformation");
 
@@ -132,28 +119,28 @@ namespace OpenMcdf.Extensions.Test
         {
             try
             {
-                using (CompoundFile cf = new CompoundFile("wstr_presets.doc"))
+                using (var cf = new CompoundFile("wstr_presets.doc"))
                 {
-                    var co = cf.RootStorage.GetStream("\u0005SummaryInformation").AsOLEPropertiesContainer();
+                    var co = cf.RootStorage.GetStream("\u0005SummaryInformation").AsOlePropertiesContainer();
 
-                    foreach (OLEProperties.OLEProperty p in co.Properties)
+                    foreach (var p in co.Properties)
                     {
                         Debug.Write(p.PropertyName);
                         Debug.Write(" - ");
-                        Debug.Write(p.VTType);
+                        Debug.Write(p.VtType);
                         Debug.Write(" - ");
                         Debug.WriteLine(p.Value);
                     }
 
                     Assert.IsNotNull(co.Properties);
 
-                    var co2 = cf.RootStorage.GetStream("\u0005DocumentSummaryInformation").AsOLEPropertiesContainer();
+                    var co2 = cf.RootStorage.GetStream("\u0005DocumentSummaryInformation").AsOlePropertiesContainer();
 
-                    foreach (OLEProperties.OLEProperty p in co2.Properties)
+                    foreach (var p in co2.Properties)
                     {
                         Debug.Write(p.PropertyName);
                         Debug.Write(" - ");
-                        Debug.Write(p.VTType);
+                        Debug.Write(p.VtType);
                         Debug.Write(" - ");
                         Debug.WriteLine(p.Value);
                     }
@@ -173,40 +160,40 @@ namespace OpenMcdf.Extensions.Test
         {
             try
             {
-                using (CompoundFile cf = new CompoundFile("2custom.doc"))
+                using (var cf = new CompoundFile("2custom.doc"))
                 {
-                    var co = cf.RootStorage.GetStream("\u0005SummaryInformation").AsOLEPropertiesContainer();
+                    var co = cf.RootStorage.GetStream("\u0005SummaryInformation").AsOlePropertiesContainer();
 
-                    foreach (OLEProperties.OLEProperty p in co.Properties)
+                    foreach (var p in co.Properties)
                     {
                         Debug.Write(p.PropertyName);
                         Debug.Write(" - ");
-                        Debug.Write(p.VTType);
+                        Debug.Write(p.VtType);
                         Debug.Write(" - ");
                         Debug.WriteLine(p.Value);
                     }
 
                     Assert.IsNotNull(co.Properties);
 
-                    var co2 = cf.RootStorage.GetStream("\u0005DocumentSummaryInformation").AsOLEPropertiesContainer();
+                    var co2 = cf.RootStorage.GetStream("\u0005DocumentSummaryInformation").AsOlePropertiesContainer();
 
                     Assert.IsNotNull(co2.Properties);
-                    foreach (OLEProperties.OLEProperty p in co2.Properties)
+                    foreach (var p in co2.Properties)
                     {
                         Debug.Write(p.PropertyName);
                         Debug.Write(" - ");
-                        Debug.Write(p.VTType);
+                        Debug.Write(p.VtType);
                         Debug.Write(" - ");
                         Debug.WriteLine(p.Value);
                     }
 
                     
                     Assert.IsNotNull(co2.UserDefinedProperties.Properties);
-                    foreach (OLEProperties.OLEProperty p in co2.UserDefinedProperties.Properties)
+                    foreach (var p in co2.UserDefinedProperties.Properties)
                     {
                         Debug.Write(p.PropertyName);
                         Debug.Write(" - ");
-                        Debug.Write(p.VTType);
+                        Debug.Write(p.VtType);
                         Debug.Write(" - ");
                         Debug.WriteLine(p.Value);
                     }
@@ -222,15 +209,15 @@ namespace OpenMcdf.Extensions.Test
         [TestMethod]
         public void Test_SUMMARY_INFO_READ_LPWSTRING()
         {
-            using (CompoundFile cf = new CompoundFile("english.presets.doc"))
+            using (var cf = new CompoundFile("english.presets.doc"))
             {
-                var co = cf.RootStorage.GetStream("\u0005SummaryInformation").AsOLEPropertiesContainer();
+                var co = cf.RootStorage.GetStream("\u0005SummaryInformation").AsOlePropertiesContainer();
 
-                foreach (OLEProperties.OLEProperty p in co.Properties)
+                foreach (var p in co.Properties)
                 {
                     Debug.Write(p.PropertyName);
                     Debug.Write(" - ");
-                    Debug.Write(p.VTType);
+                    Debug.Write(p.VtType);
                     Debug.Write(" - ");
                     Debug.WriteLine(p.Value);
                 }

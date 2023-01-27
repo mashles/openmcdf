@@ -1,8 +1,7 @@
 ﻿using System;
-using System.IO;
 using System.Diagnostics;
+using System.IO;
 
-using OpenMcdf;
 //This project is used for profiling memory and performances of OpenMCDF .
 
 namespace OpenMcdf.MemTest
@@ -22,29 +21,29 @@ namespace OpenMcdf.MemTest
 
         private static void TestCode()
         {
-            const int N_FACTOR = 1000;
+            const int nFactor = 1000;
 
-            byte[] bA = GetBuffer(20 * 1024 * N_FACTOR, 0x0A);
-            byte[] bB = GetBuffer(5 * 1024, 0x0B);
-            byte[] bC = GetBuffer(5 * 1024, 0x0C);
-            byte[] bD = GetBuffer(5 * 1024, 0x0D);
-            byte[] bE = GetBuffer(8 * 1024 * N_FACTOR + 1, 0x1A);
-            byte[] bF = GetBuffer(16 * 1024 * N_FACTOR, 0x1B);
-            byte[] bG = GetBuffer(14 * 1024 * N_FACTOR, 0x1C);
-            byte[] bH = GetBuffer(12 * 1024 * N_FACTOR, 0x1D);
-            byte[] bE2 = GetBuffer(8 * 1024 * N_FACTOR, 0x2A);
-            byte[] bMini = GetBuffer(1027, 0xEE);
+            var bA = GetBuffer(20 * 1024 * nFactor, 0x0A);
+            var bB = GetBuffer(5 * 1024, 0x0B);
+            var bC = GetBuffer(5 * 1024, 0x0C);
+            var bD = GetBuffer(5 * 1024, 0x0D);
+            var bE = GetBuffer(8 * 1024 * nFactor + 1, 0x1A);
+            var bF = GetBuffer(16 * 1024 * nFactor, 0x1B);
+            var bG = GetBuffer(14 * 1024 * nFactor, 0x1C);
+            var bH = GetBuffer(12 * 1024 * nFactor, 0x1D);
+            var bE2 = GetBuffer(8 * 1024 * nFactor, 0x2A);
+            var bMini = GetBuffer(1027, 0xEE);
 
-            Stopwatch sw = new Stopwatch();
+            var sw = new Stopwatch();
             sw.Start();
 
-            var cf = new CompoundFile(CFSVersion.Ver_3, CFSConfiguration.SectorRecycle);
+            var cf = new CompoundFile(CfsVersion.Ver3, CfsConfiguration.SectorRecycle);
             cf.RootStorage.AddStream("A").SetData(bA);
             cf.Save("OneStream.cfs");
 
             cf.Close();
 
-            cf = new CompoundFile("OneStream.cfs", CFSUpdateMode.ReadOnly, CFSConfiguration.SectorRecycle);
+            cf = new CompoundFile("OneStream.cfs", CfsUpdateMode.ReadOnly, CfsConfiguration.SectorRecycle);
 
             cf.RootStorage.AddStream("B").SetData(bB);
             cf.RootStorage.AddStream("C").SetData(bC);
@@ -60,7 +59,7 @@ namespace OpenMcdf.MemTest
 
             File.Copy("8_Streams.cfs", "6_Streams.cfs", true);
 
-            cf = new CompoundFile("6_Streams.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle|CFSConfiguration.EraseFreeSectors);
+            cf = new CompoundFile("6_Streams.cfs", CfsUpdateMode.Update, CfsConfiguration.SectorRecycle|CfsConfiguration.EraseFreeSectors);
             cf.RootStorage.Delete("D");
             cf.RootStorage.Delete("G");
             cf.Commit();
@@ -69,23 +68,23 @@ namespace OpenMcdf.MemTest
 
             File.Copy("6_Streams.cfs", "6_Streams_Shrinked.cfs", true);
 
-            cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle);
+            cf = new CompoundFile("6_Streams_Shrinked.cfs", CfsUpdateMode.Update, CfsConfiguration.SectorRecycle);
             cf.RootStorage.AddStream("ZZZ").SetData(bF);
             cf.RootStorage.GetStream("E").Append(bE2);
             cf.Commit();
             cf.Close();
 
-            cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle);
-            cf.RootStorage.CLSID = new Guid("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+            cf = new CompoundFile("6_Streams_Shrinked.cfs", CfsUpdateMode.Update, CfsConfiguration.SectorRecycle);
+            cf.RootStorage.Clsid = new Guid("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
             cf.Commit();
             cf.Close();
 
-            cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle);
+            cf = new CompoundFile("6_Streams_Shrinked.cfs", CfsUpdateMode.Update, CfsConfiguration.SectorRecycle);
             cf.RootStorage.AddStorage("MyStorage").AddStream("ANS").Append(bE);
             cf.Commit();
             cf.Close();
 
-            cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle);
+            cf = new CompoundFile("6_Streams_Shrinked.cfs", CfsUpdateMode.Update, CfsConfiguration.SectorRecycle);
             cf.RootStorage.AddStorage("AnotherStorage").AddStream("ANS").Append(bE);
             cf.RootStorage.Delete("MyStorage");
             cf.Commit();
@@ -93,13 +92,13 @@ namespace OpenMcdf.MemTest
 
             CompoundFile.ShrinkCompoundFile("6_Streams_Shrinked.cfs");
 
-            cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle);
+            cf = new CompoundFile("6_Streams_Shrinked.cfs", CfsUpdateMode.Update, CfsConfiguration.SectorRecycle);
             cf.RootStorage.AddStorage("MiniStorage").AddStream("miniSt").Append(bMini);
             cf.RootStorage.GetStorage("MiniStorage").AddStream("miniSt2").Append(bMini);
             cf.Commit();
             cf.Close();
 
-            cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.Update, CFSConfiguration.SectorRecycle);
+            cf = new CompoundFile("6_Streams_Shrinked.cfs", CfsUpdateMode.Update, CfsConfiguration.SectorRecycle);
             cf.RootStorage.GetStorage("MiniStorage").Delete("miniSt");
 
 
@@ -107,7 +106,7 @@ namespace OpenMcdf.MemTest
             cf.Commit();
             cf.Close();
 
-            cf = new CompoundFile("6_Streams_Shrinked.cfs", CFSUpdateMode.ReadOnly, CFSConfiguration.SectorRecycle);
+            cf = new CompoundFile("6_Streams_Shrinked.cfs", CfsUpdateMode.ReadOnly, CfsConfiguration.SectorRecycle);
 
             var myStream = cf.RootStorage.GetStream("C");
             var data = myStream.GetData();
@@ -127,32 +126,32 @@ namespace OpenMcdf.MemTest
 
         private static void StressMemory()
         {
-            const int N_LOOP = 20;
-            const int MB_SIZE = 10;
+            const int nLoop = 20;
+            const int mbSize = 10;
 
-            byte[] b = GetBuffer(1024 * 1024 * MB_SIZE); //2GB buffer
-            byte[] cmp = new byte[] { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 };
+            var b = GetBuffer(1024 * 1024 * mbSize); //2GB buffer
+            var cmp = new byte[] { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 };
 
-            CompoundFile cf = new CompoundFile(CFSVersion.Ver_4, CFSConfiguration.Default);
-            CFStream st = cf.RootStorage.AddStream("MySuperLargeStream");
+            var cf = new CompoundFile(CfsVersion.Ver4, CfsConfiguration.Default);
+            var st = cf.RootStorage.AddStream("MySuperLargeStream");
             cf.Save("LARGE.cfs");
             cf.Close();
 
             //Console.WriteLine("Closed save");
             //Console.ReadKey();
 
-            cf = new CompoundFile("LARGE.cfs", CFSUpdateMode.Update, CFSConfiguration.Default);
-            CFStream cfst = cf.RootStorage.GetStream("MySuperLargeStream");
+            cf = new CompoundFile("LARGE.cfs", CfsUpdateMode.Update, CfsConfiguration.Default);
+            var cfst = cf.RootStorage.GetStream("MySuperLargeStream");
 
-            Stopwatch sw = new Stopwatch();
+            var sw = new Stopwatch();
             sw.Start();
-            for (int i = 0; i < N_LOOP; i++)
+            for (var i = 0; i < nLoop; i++)
             {
 
                 cfst.Append(b);
                 cf.Commit(true);
 
-                Console.WriteLine("     Updated " + i.ToString());
+                Console.WriteLine("     Updated " + i);
                 //Console.ReadKey();
             }
 
@@ -172,11 +171,11 @@ namespace OpenMcdf.MemTest
             //Console.ReadKey();
 
             cf = new CompoundFile("LARGE.cfs");
-            int count = 8;
+            var count = 8;
             sw.Reset();
             sw.Start();
-            byte[] data = new byte[count];
-            count = cf.RootStorage.GetStream("MySuperLargeStream").Read(data, b.Length * (long)N_LOOP, count);
+            var data = new byte[count];
+            count = cf.RootStorage.GetStream("MySuperLargeStream").Read(data, b.Length * (long)nLoop, count);
             sw.Stop();
             Console.Write(count);
             cf.Close();
@@ -189,16 +188,16 @@ namespace OpenMcdf.MemTest
         private static void DummyFile()
         {
             Console.WriteLine("Start");
-            FileStream fs = new FileStream("myDummyFile", FileMode.Create);
+            var fs = new FileStream("myDummyFile", FileMode.Create);
             fs.Close();
 
-            Stopwatch sw = new Stopwatch();
+            var sw = new Stopwatch();
 
-            byte[] b = GetBuffer(1024 * 1024 * 50); //2GB buffer
+            var b = GetBuffer(1024 * 1024 * 50); //2GB buffer
 
             fs = new FileStream("myDummyFile", FileMode.Open);
             sw.Start();
-            for (int i = 0; i < 42; i++)
+            for (var i = 0; i < 42; i++)
             {
 
                 fs.Seek(b.Length * i, SeekOrigin.Begin);
@@ -214,25 +213,25 @@ namespace OpenMcdf.MemTest
             Console.ReadKey();
         }
 
-        private static void AddNodes(String depth, CFStorage cfs)
+        private static void AddNodes(string depth, CfStorage cfs)
         {
 
-            Action<CFItem> va = delegate(CFItem target)
+            var va = delegate(CfItem target)
             {
 
-                String temp = target.Name + (target is CFStorage ? "" : " (" + target.Size + " bytes )");
+                var temp = target.Name + (target is CfStorage ? "" : " (" + target.Size + " bytes )");
 
                 //Stream
 
                 Console.WriteLine(depth + temp);
 
-                if (target is CFStorage)
+                if (target is CfStorage)
                 {  //Storage
 
-                    String newDepth = depth + "    ";
+                    var newDepth = depth + "    ";
 
                     //Recursion into the storage
-                    AddNodes(newDepth, (CFStorage)target);
+                    AddNodes(newDepth, (CfStorage)target);
 
                 }
             };
@@ -243,31 +242,31 @@ namespace OpenMcdf.MemTest
 
         public static void TestMultipleStreamCommit()
         {
-            String srcFilename = Directory.GetCurrentDirectory() + @"\testfile\report.xls";
-            String dstFilename = Directory.GetCurrentDirectory() + @"\testfile\reportOverwriteMultiple.xls";
+            var srcFilename = Directory.GetCurrentDirectory() + @"\testfile\report.xls";
+            var dstFilename = Directory.GetCurrentDirectory() + @"\testfile\reportOverwriteMultiple.xls";
             //Console.WriteLine(Directory.GetCurrentDirectory());
             //Console.ReadKey(); 
             File.Copy(srcFilename, dstFilename, true);
 
-            CompoundFile cf = new CompoundFile(dstFilename, CFSUpdateMode.Update, CFSConfiguration.SectorRecycle);
+            var cf = new CompoundFile(dstFilename, CfsUpdateMode.Update, CfsConfiguration.SectorRecycle);
 
-            Random r = new Random();
+            var r = new Random();
 
-            DateTime start = DateTime.Now;
+            var start = DateTime.Now;
 
-            for (int i = 0; i < 1000; i++)
+            for (var i = 0; i < 1000; i++)
             {
-                byte[] buffer = GetBuffer(r.Next(100, 3500), 0x0A);
+                var buffer = GetBuffer(r.Next(100, 3500), 0x0A);
 
                 if (i > 0)
                 {
                     if (r.Next(0, 100) > 50)
                     {
-                        cf.RootStorage.Delete("MyNewStream" + (i - 1).ToString());
+                        cf.RootStorage.Delete("MyNewStream" + (i - 1));
                     }
                 }
 
-                CFStream addedStream = cf.RootStorage.AddStream("MyNewStream" + i.ToString());
+                var addedStream = cf.RootStorage.AddStream("MyNewStream" + i);
 
                 addedStream.SetData(buffer);
 
@@ -278,23 +277,23 @@ namespace OpenMcdf.MemTest
 
             cf.Close();
 
-            TimeSpan sp = (DateTime.Now - start);
+            var sp = (DateTime.Now - start);
             Console.WriteLine(sp.TotalMilliseconds);
 
         }
 
         private static byte[] GetBuffer(int count)
         {
-            Random r = new Random();
-            byte[] b = new byte[count];
+            var r = new Random();
+            var b = new byte[count];
             r.NextBytes(b);
             return b;
         }
 
         private static byte[] GetBuffer(int count, byte c)
         {
-            byte[] b = new byte[count];
-            for (int i = 0; i < b.Length; i++)
+            var b = new byte[count];
+            for (var i = 0; i < b.Length; i++)
             {
                 b[i] = c;
             }
@@ -313,7 +312,7 @@ namespace OpenMcdf.MemTest
             if (b.Length != p.Length)
                 return false;
 
-            for (int i = 0; i < b.Length; i++)
+            for (var i = 0; i < b.Length; i++)
             {
                 if (b[i] != p[i])
                     return false;

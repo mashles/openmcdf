@@ -1,159 +1,134 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using OpenMcdf.Extensions.OLEProperties.Interfaces;
-using System.Linq;
 
 namespace OpenMcdf.Extensions.OLEProperties
 {
     internal abstract class TypedPropertyValue<T> : ITypedPropertyValue
     {
-        private bool isVariant = false;
-        private PropertyDimensions dim = PropertyDimensions.IsScalar;
+        private readonly bool _isVariant;
+        private readonly PropertyDimensions _dim = PropertyDimensions.IsScalar;
 
-        private VTPropertyType _VTType;
+        private readonly VtPropertyType _vtType;
 
-        public PropertyType PropertyType
+        public PropertyType PropertyType => PropertyType.TypedPropertyValue;
+
+        public VtPropertyType VtType => _vtType;
+
+        protected object PropertyValue;
+
+        public TypedPropertyValue(VtPropertyType vtType, bool isVariant = false)
         {
-            get
-            {
-                return PropertyType.TypedPropertyValue;
-            }
+            _vtType = vtType;
+            _dim = CheckPropertyDimensions(vtType);
+            _isVariant = isVariant;
         }
 
-        public VTPropertyType VTType
-        {
-            get { return _VTType; }
-        }
+        public PropertyDimensions PropertyDimensions => _dim;
 
-        protected object propertyValue = null;
+        public bool IsVariant => _isVariant;
 
-        public TypedPropertyValue(VTPropertyType vtType, bool isVariant = false)
-        {
-            this._VTType = vtType;
-            dim = CheckPropertyDimensions(vtType);
-            this.isVariant = isVariant;
-        }
-
-        public PropertyDimensions PropertyDimensions { get { return dim; } }
-
-        public bool IsVariant
-        {
-            get { return isVariant; }
-        }
-
-        private PropertyDimensions CheckPropertyDimensions(VTPropertyType vtType)
+        private PropertyDimensions CheckPropertyDimensions(VtPropertyType vtType)
         {
             if ((((ushort)vtType) & 0x1000) != 0)
                 return PropertyDimensions.IsVector;
-            else if ((((ushort)vtType) & 0x2000) != 0)
+            if ((((ushort)vtType) & 0x2000) != 0)
                 return PropertyDimensions.IsArray;
-            else
-                return PropertyDimensions.IsScalar;
+            return PropertyDimensions.IsScalar;
         }
 
         public virtual object Value
         {
-            get
-            {
-                return propertyValue;
-            }
+            get => PropertyValue;
 
-            set
-            {
-                propertyValue = value;
-            }
+            set => PropertyValue = value;
         }
 
-        public abstract T ReadScalarValue(System.IO.BinaryReader br);
+        public abstract T ReadScalarValue(BinaryReader br);
 
 
-        public void Read(System.IO.BinaryReader br)
+        public void Read(BinaryReader br)
         {
-            long currentPos = br.BaseStream.Position;
-            int size = 0;
-            int m = 0;
+            var currentPos = br.BaseStream.Position;
+            var size = 0;
+            var m = 0;
 
-            switch (this.PropertyDimensions)
+            switch (PropertyDimensions)
             {
                 case PropertyDimensions.IsScalar:
-                    this.propertyValue = ReadScalarValue(br);
+                    PropertyValue = ReadScalarValue(br);
                     size = (int)(br.BaseStream.Position - currentPos);
 
-                    m = (int)size % 4;
+                    m = size % 4;
 
                     if (m > 0 && !IsVariant)
                         br.ReadBytes(m); // padding
                     break;
 
                 case PropertyDimensions.IsVector:
-                    uint nItems = br.ReadUInt32();
+                    var nItems = br.ReadUInt32();
 
-                    List<T> res = new List<T>();
+                    var res = new List<T>();
 
 
-                    for (int i = 0; i < nItems; i++)
+                    for (var i = 0; i < nItems; i++)
                     {
-                        T s = ReadScalarValue(br);
+                        var s = ReadScalarValue(br);
 
                         res.Add(s);
                     }
 
-                    this.propertyValue = res;
+                    PropertyValue = res;
                     size = (int)(br.BaseStream.Position - currentPos);
 
-                    m = (int)size % 4;
+                    m = size % 4;
                     if (m > 0 && !IsVariant)
                         br.ReadBytes(m); // padding
-                    break;
-                default:
                     break;
             }
         }
 
-        public abstract void WriteScalarValue(System.IO.BinaryWriter bw, T pValue);
+        public abstract void WriteScalarValue(BinaryWriter bw, T pValue);
 
         public void Write(BinaryWriter bw)
         {
-            long currentPos = bw.BaseStream.Position;
-            int size = 0;
-            int m = 0;
-            bool needsPadding = HasPadding();
+            var currentPos = bw.BaseStream.Position;
+            var size = 0;
+            var m = 0;
+            var needsPadding = HasPadding();
 
-            switch (this.PropertyDimensions)
+            switch (PropertyDimensions)
             {
                 case PropertyDimensions.IsScalar:
 
-                    bw.Write((ushort)_VTType);
+                    bw.Write((ushort)_vtType);
                     bw.Write((ushort)0);
 
-                    WriteScalarValue(bw, (T)this.propertyValue);
+                    WriteScalarValue(bw, (T)PropertyValue);
                     size = (int)(bw.BaseStream.Position - currentPos);
-                    m = (int)size % 4;
+                    m = size % 4;
 
                     if (m > 0 && needsPadding)
-                        for (int i = 0; i < m; i++)  // padding
+                        for (var i = 0; i < m; i++)  // padding
                             bw.Write((byte)0);
                     break;
 
                 case PropertyDimensions.IsVector:
 
-                    bw.Write((ushort)_VTType);
+                    bw.Write((ushort)_vtType);
                     bw.Write((ushort)0);
-                    bw.Write((uint)((List<T>)this.propertyValue).Count);
+                    bw.Write((uint)((List<T>)PropertyValue).Count);
 
-                    for (int i = 0; i < ((List<T>)this.propertyValue).Count; i++)
+                    for (var i = 0; i < ((List<T>)PropertyValue).Count; i++)
                     {
-                        WriteScalarValue(bw, ((List<T>)this.propertyValue)[i]);
+                        WriteScalarValue(bw, ((List<T>)PropertyValue)[i]);
                     }
 
                     size = (int)(bw.BaseStream.Position - currentPos);
-                    m = (int)size % 4;
+                    m = size % 4;
 
                     if (m > 0 && needsPadding)
-                        for (int i = 0; i < m; i++)  // padding
+                        for (var i = 0; i < m; i++)  // padding
                             bw.Write((byte)0);
                     break;
             }
@@ -162,16 +137,16 @@ namespace OpenMcdf.Extensions.OLEProperties
         private bool HasPadding()
         {
 
-            VTPropertyType vt = (VTPropertyType)((ushort)this.VTType & 0x00FF);
+            var vt = (VtPropertyType)((ushort)VtType & 0x00FF);
 
             switch (vt)
             {
-                case VTPropertyType.VT_LPSTR:
-                    if (this.IsVariant) return false;
-                    if (dim == PropertyDimensions.IsVector) return false;
+                case VtPropertyType.VtLpstr:
+                    if (IsVariant) return false;
+                    if (_dim == PropertyDimensions.IsVector) return false;
                     break;
-                case VTPropertyType.VT_VARIANT_VECTOR:
-                    if (dim == PropertyDimensions.IsVector) return false;
+                case VtPropertyType.VtVariantVector:
+                    if (_dim == PropertyDimensions.IsVector) return false;
                     break;
                 default:
                     return true;

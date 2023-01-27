@@ -3,6 +3,7 @@
     <TargetFramework>net7.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
     <AssemblyName>StucturedStorageExplorer</AssemblyName>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <PublishUrl>http://localhost/StucturedStorageExplorer/</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>

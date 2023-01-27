@@ -1,7 +1,4 @@
 ﻿using OpenMcdf.Extensions.OLEProperties;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace OpenMcdf.Extensions
 {
@@ -23,9 +20,9 @@ namespace OpenMcdf.Extensions
         /// - Array properties are NOT supported;
         /// - Property Stream is re-created on save;
         /// </remarks>
-        public static OLEPropertiesContainer AsOLEPropertiesContainer(this CFStream cfStream)
+        public static OlePropertiesContainer AsOlePropertiesContainer(this CfStream cfStream)
         {
-            return new OLEPropertiesContainer(cfStream);
+            return new OlePropertiesContainer(cfStream);
         }
     }
 }

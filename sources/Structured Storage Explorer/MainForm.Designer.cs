@@ -1,11 +1,15 @@
-﻿namespace StructuredStorageExplorer
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using Be.Windows.Forms;
+
+namespace StructuredStorageExplorer
 {
     partial class MainForm
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -420,36 +424,36 @@
 
         #endregion
 
-        private System.Windows.Forms.OpenFileDialog openFileDialog1;
-        private System.Windows.Forms.TreeView treeView1;
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem exportDataToolStripMenuItem;
-        private System.Windows.Forms.SaveFileDialog saveFileDialog1;
-        private System.Windows.Forms.ToolStripMenuItem removeToolStripMenuItem;
-        private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem saveAsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem updateCurrentFileToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem addStreamToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem importDataStripMenuItem1;
-        private System.Windows.Forms.OpenFileDialog openDataFileDialog;
-        private System.Windows.Forms.ToolStripMenuItem addStorageStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem newStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem openFileMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.ToolStripStatusLabel fileNameLabel;
-        private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.PropertyGrid propertyGrid1;
-        private System.Windows.Forms.SplitContainer splitContainer2;
-        private Be.Windows.Forms.HexBox hexEditor;
-        private System.Windows.Forms.ToolStripMenuItem closeStripMenuItem1;
-        private System.Windows.Forms.TabControl tabControl1;
-        private System.Windows.Forms.TabPage tabPage1;
-        private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.DataGridView dgvOLEProps;
-        private System.Windows.Forms.DataGridView dgvUserDefinedProperties;
-        private System.Windows.Forms.SplitContainer splitContainer3;
+        private OpenFileDialog openFileDialog1;
+        private TreeView treeView1;
+        private ContextMenuStrip contextMenuStrip1;
+        private ToolStripMenuItem exportDataToolStripMenuItem;
+        private SaveFileDialog saveFileDialog1;
+        private ToolStripMenuItem removeToolStripMenuItem;
+        private MenuStrip menuStrip1;
+        private ToolStripMenuItem fileToolStripMenuItem;
+        private ToolStripMenuItem saveAsToolStripMenuItem;
+        private ToolStripMenuItem updateCurrentFileToolStripMenuItem;
+        private ToolStripMenuItem addStreamToolStripMenuItem;
+        private ToolStripMenuItem importDataStripMenuItem1;
+        private OpenFileDialog openDataFileDialog;
+        private ToolStripMenuItem addStorageStripMenuItem1;
+        private ToolStripMenuItem newStripMenuItem1;
+        private ToolStripMenuItem openFileMenuItem;
+        private ToolStripSeparator toolStripSeparator2;
+        private StatusStrip statusStrip1;
+        private ToolStripStatusLabel fileNameLabel;
+        private SplitContainer splitContainer1;
+        private PropertyGrid propertyGrid1;
+        private SplitContainer splitContainer2;
+        private HexBox hexEditor;
+        private ToolStripMenuItem closeStripMenuItem1;
+        private TabControl tabControl1;
+        private TabPage tabPage1;
+        private TabPage tabPage2;
+        private DataGridView dgvOLEProps;
+        private DataGridView dgvUserDefinedProperties;
+        private SplitContainer splitContainer3;
     }
 }
 

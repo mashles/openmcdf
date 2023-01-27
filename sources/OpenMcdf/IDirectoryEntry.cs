@@ -7,13 +7,13 @@
  * The Initial Developer of the Original Code is Federico Blaseotto.*/
 
 
-using RedBlackTree;
 using System;
-
+using System.IO;
+using RedBlackTree;
 
 namespace OpenMcdf
 {
-    internal interface IDirectoryEntry : IComparable, IRBNode
+    internal interface IDirectoryEntry : IComparable, IRbNode
     {
         int Child { get; set; }
         byte[] CreationDate { get; set; }
@@ -23,16 +23,16 @@ namespace OpenMcdf
         byte[] ModifyDate { get; set; }
         string Name { get; }
         ushort NameLength { get; set; }
-        void Read(System.IO.Stream stream, CFSVersion ver = CFSVersion.Ver_3);
+        void Read(Stream stream, CfsVersion ver = CfsVersion.Ver3);
         int RightSibling { get; set; }
         void SetEntryName(string entryName);
-        int SID { get; set; }
+        int Sid { get; set; }
         long Size { get; set; }
         int StartSetc { get; set; }
         int StateBits { get; set; }
         StgColor StgColor { get; set; }
         StgType StgType { get; set; }
-        Guid StorageCLSID { get; set; }
-        void Write(System.IO.Stream stream);
+        Guid StorageClsid { get; set; }
+        void Write(Stream stream);
     }
 }

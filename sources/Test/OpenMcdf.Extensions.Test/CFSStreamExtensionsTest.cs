@@ -9,15 +9,9 @@ namespace OpenMcdf.Extensions.Test
     /// Summary description for UnitTest1
     /// </summary>
     [TestClass]
-    public class CFSStreamExtensionsTest
+    public class CfsStreamExtensionsTest
     {
-        public CFSStreamExtensionsTest()
-        {
-          
-        }
-
-       
-        private TestContext testContextInstance;
+        private TestContext _testContextInstance;
 
         /// <summary>
         ///Gets or sets the test context which provides
@@ -25,14 +19,8 @@ namespace OpenMcdf.Extensions.Test
         ///</summary>
         public TestContext TestContext
         {
-            get
-            {
-                return testContextInstance;
-            }
-            set
-            {
-                testContextInstance = value;
-            }
+            get => _testContextInstance;
+            set => _testContextInstance = value;
         }
 
         #region Additional test attributes
@@ -60,29 +48,29 @@ namespace OpenMcdf.Extensions.Test
         [TestMethod]
         public void Test_AS_IOSTREAM_READ()
         {
-            CompoundFile cf = new CompoundFile("MultipleStorage.cfs");
+            var cf = new CompoundFile("MultipleStorage.cfs");
 
-            Stream s = cf.RootStorage.GetStorage("MyStorage").GetStream("MyStream").AsIOStream();
-            BinaryReader br = new BinaryReader(s);
-            byte[] result = br.ReadBytes(32);
+            var s = cf.RootStorage.GetStorage("MyStorage").GetStream("MyStream").AsIoStream();
+            var br = new BinaryReader(s);
+            var result = br.ReadBytes(32);
             Assert.IsTrue(Helpers.CompareBuffer(Helpers.GetBuffer(32, 1), result));
         }
 
         [TestMethod]
         public void Test_AS_IOSTREAM_WRITE()
         {
-            const String cmp = "Hello World of BinaryWriter !";
+            const string cmp = "Hello World of BinaryWriter !";
 
-            CompoundFile cf = new CompoundFile();
-            Stream s = cf.RootStorage.AddStream("ANewStream").AsIOStream();
-            BinaryWriter bw = new BinaryWriter(s);
+            var cf = new CompoundFile();
+            var s = cf.RootStorage.AddStream("ANewStream").AsIoStream();
+            var bw = new BinaryWriter(s);
             bw.Write(cmp);
             cf.Save("$ACFFile.cfs");
             cf.Close();
 
             cf = new CompoundFile("$ACFFile.cfs");
-            BinaryReader br = new BinaryReader(cf.RootStorage.GetStream("ANewStream").AsIOStream());
-            String st = br.ReadString();
+            var br = new BinaryReader(cf.RootStorage.GetStream("ANewStream").AsIoStream());
+            var st = br.ReadString();
             Assert.IsTrue(st == cmp);
             cf.Close();
         }
@@ -90,17 +78,17 @@ namespace OpenMcdf.Extensions.Test
         [TestMethod]
         public void Test_AS_IOSTREAM_MULTISECTOR_WRITE()
         {
-            byte[] data = new byte[670];
-            for (int i = 0; i < data.Length; i++)
+            var data = new byte[670];
+            for (var i = 0; i < data.Length; i++)
             {
                 data[i] = (byte)(i % 255);
             }
             
-            using (CompoundFile cf = new CompoundFile())
+            using (var cf = new CompoundFile())
             {
-                using (Stream s = cf.RootStorage.AddStream("ANewStream").AsIOStream())
+                using (var s = cf.RootStorage.AddStream("ANewStream").AsIoStream())
                 {
-                    using (BinaryWriter bw = new BinaryWriter(s))
+                    using (var bw = new BinaryWriter(s))
                     {
                         bw.Write(data);
                         cf.Save("$ACFFile2.cfs");
@@ -110,12 +98,12 @@ namespace OpenMcdf.Extensions.Test
             }
 
             // Works
-            using (CompoundFile cf = new CompoundFile("$ACFFile2.cfs"))
+            using (var cf = new CompoundFile("$ACFFile2.cfs"))
             {
-                using (BinaryReader br = new BinaryReader(cf.RootStorage.GetStream("ANewStream").AsIOStream()))
+                using (var br = new BinaryReader(cf.RootStorage.GetStream("ANewStream").AsIoStream()))
                 {
-                    byte[] readData = new byte[data.Length];
-                    int readCount = br.Read(readData, 0, readData.Length);
+                    var readData = new byte[data.Length];
+                    var readCount = br.Read(readData, 0, readData.Length);
                     Assert.IsTrue(readCount == readData.Length);
                     Assert.IsTrue(data.SequenceEqual(readData));
                     cf.Close();
@@ -123,12 +111,12 @@ namespace OpenMcdf.Extensions.Test
             }
 
             // Won't work until #88 is fixed.
-            using (CompoundFile cf = new CompoundFile("$ACFFile2.cfs"))
+            using (var cf = new CompoundFile("$ACFFile2.cfs"))
             {
-                using (Stream readStream = cf.RootStorage.GetStream("ANewStream").AsIOStream())
+                using (var readStream = cf.RootStorage.GetStream("ANewStream").AsIoStream())
                 {
                     byte[] readData;
-                    using (MemoryStream ms = new MemoryStream())
+                    using (var ms = new MemoryStream())
                     {
                         readStream.CopyTo(ms);
                         readData = ms.ToArray();

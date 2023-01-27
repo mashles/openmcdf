@@ -1,7 +1,5 @@
-﻿using OpenMcdf;
+﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
-using System;
 
 namespace OpenMcdf.Test
 {
@@ -11,12 +9,12 @@ namespace OpenMcdf.Test
     ///This is a test class for SectorCollectionTest and is intended
     ///to contain all SectorCollectionTest Unit Tests
     ///</summary>
-    [TestClass()]
+    [TestClass]
     public class SectorCollectionTest
     {
 
 
-        private TestContext testContextInstance;
+        private TestContext _testContextInstance;
 
         /// <summary>
         ///Gets or sets the test context which provides
@@ -24,14 +22,8 @@ namespace OpenMcdf.Test
         ///</summary>
         public TestContext TestContext
         {
-            get
-            {
-                return testContextInstance;
-            }
-            set
-            {
-                testContextInstance = value;
-            }
+            get => _testContextInstance;
+            set => _testContextInstance = value;
         }
 
         #region Additional test attributes
@@ -68,24 +60,24 @@ namespace OpenMcdf.Test
         /// <summary>
         ///A test for Count
         ///</summary>
-        [TestMethod()]
+        [TestMethod]
         public void CountTest()
         {
             
-            int count = 0;
+            var count = 0;
 
-            SectorCollection target = new SectorCollection(); // TODO: Initialize to an appropriate value
+            var target = new SectorCollection();
             int actual;
             actual = target.Count;
 
             Assert.IsTrue(actual == count);
-            Sector s = new Sector(4096);
+            var s = new Sector(4096);
 
             target.Add(s);
             Assert.IsTrue(target.Count == actual + 1);
 
 
-            for (int i = 0; i < 5000; i++)
+            for (var i = 0; i < 5000; i++)
                 target.Add(s);
 
             Assert.IsTrue(target.Count == actual + 1 + 5000);
@@ -94,15 +86,15 @@ namespace OpenMcdf.Test
         /// <summary>
         ///A test for Item
         ///</summary>
-        [TestMethod()]
+        [TestMethod]
         public void ItemTest()
         {
-            int count = 37;
+            var count = 37;
 
-            SectorCollection target = new SectorCollection();
-            int index = 0;
+            var target = new SectorCollection();
+            var index = 0;
 
-            Sector expected = new Sector(4096);
+            var expected = new Sector(4096);
             target.Add(null);
 
             Sector actual;
@@ -121,7 +113,7 @@ namespace OpenMcdf.Test
             }
             catch (Exception ex)
             {
-                Assert.IsTrue(ex is CFException);
+                Assert.IsTrue(ex is CfException);
             }
 
             try
@@ -130,23 +122,23 @@ namespace OpenMcdf.Test
             }
             catch (Exception ex)
             {
-                Assert.IsTrue(ex is CFException);
+                Assert.IsTrue(ex is CfException);
             }
         }
 
         /// <summary>
         ///A test for SectorCollection Constructor
         ///</summary>
-        [TestMethod()]
+        [TestMethod]
         public void SectorCollectionConstructorTest()
         {
 
-            SectorCollection target = new SectorCollection();
+            var target = new SectorCollection();
 
             Assert.IsNotNull(target);
             Assert.IsTrue(target.Count == 0);
 
-            Sector s = new Sector(4096);
+            var s = new Sector(4096);
             target.Add(s);
             Assert.IsTrue(target.Count == 1);
         }
@@ -154,17 +146,17 @@ namespace OpenMcdf.Test
         /// <summary>
         ///A test for Add
         ///</summary>
-        [TestMethod()]
+        [TestMethod]
         public void AddTest()
         {
-            SectorCollection target = new SectorCollection();
-            for (int i = 0; i < 579; i++)
+            var target = new SectorCollection();
+            for (var i = 0; i < 579; i++)
             {
                 target.Add(null);
             }
 
 
-            Sector item = new Sector(4096);
+            var item = new Sector(4096);
             target.Add(item);
             Assert.IsTrue(target.Count == 580);
         }
@@ -172,22 +164,22 @@ namespace OpenMcdf.Test
         /// <summary>
         ///A test for GetEnumerator
         ///</summary>
-        [TestMethod()]
+        [TestMethod]
         public void GetEnumeratorTest()
         {
-            SectorCollection target = new SectorCollection();
-            for (int i = 0; i < 579; i++)
+            var target = new SectorCollection();
+            for (var i = 0; i < 579; i++)
             {
                 target.Add(null);
             }
 
             
-            Sector item = new Sector(4096);
+            var item = new Sector(4096);
             target.Add(item);
             Assert.IsTrue(target.Count == 580);
 
-            int cnt = 0;
-            foreach (Sector s in target)
+            var cnt = 0;
+            foreach (var s in target)
             {
                 cnt++;
             }

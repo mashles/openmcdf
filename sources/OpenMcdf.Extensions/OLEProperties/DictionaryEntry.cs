@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -7,35 +6,35 @@ namespace OpenMcdf.Extensions.OLEProperties
 {
     public class DictionaryEntry
     {
-        private const int CP_WINUNICODE = 0x04B0;
+        private const int CpWinunicode = 0x04B0;
 
-        int codePage;
+        readonly int _codePage;
 
         public DictionaryEntry(int codePage)
         {
-            this.codePage = codePage;
+            _codePage = codePage;
         }
 
         public uint PropertyIdentifier { get; set; }
         public int Length { get; set; }
-        public String Name { get { return GetName(); } }
+        public string Name => GetName();
 
-        private byte[] nameBytes;
+        private byte[] _nameBytes;
 
         public void Read(BinaryReader br)
         {
             PropertyIdentifier = br.ReadUInt32();
             Length = br.ReadInt32();
 
-            if (codePage != CP_WINUNICODE)
+            if (_codePage != CpWinunicode)
             {
-                nameBytes = br.ReadBytes(Length);
+                _nameBytes = br.ReadBytes(Length);
             }
             else
             {
-                nameBytes = br.ReadBytes(Length << 2);
+                _nameBytes = br.ReadBytes(Length << 2);
 
-                int m = Length % 4;
+                var m = Length % 4;
                 if (m > 0)
                     br.ReadBytes(m);
             }
@@ -45,7 +44,7 @@ namespace OpenMcdf.Extensions.OLEProperties
         {
             bw.Write(PropertyIdentifier);
             bw.Write(Length);
-            bw.Write(nameBytes);
+            bw.Write(_nameBytes);
 
             //if (codePage == CP_WINUNICODE)
             //    int m = Length % 4;
@@ -57,7 +56,7 @@ namespace OpenMcdf.Extensions.OLEProperties
 
         private string GetName()
         {
-            return Encoding.GetEncoding(this.codePage).GetString(nameBytes);
+            return Encoding.GetEncoding(_codePage).GetString(_nameBytes);
         }
 
 

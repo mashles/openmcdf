@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace OpenMcdf.Extensions.OLEProperties.Interfaces
+﻿namespace OpenMcdf.Extensions.OLEProperties.Interfaces
 {
     public interface ITypedPropertyValue : IProperty
     {
-        VTPropertyType VTType
+        VtPropertyType VtType
         {
             get;
             //set;

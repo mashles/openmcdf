@@ -1,57 +1,50 @@
-﻿using OpenMcdf.Extensions.OLEProperties.Interfaces;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using OpenMcdf.Extensions.OLEProperties.Interfaces;
 
 namespace OpenMcdf.Extensions.OLEProperties
 {
     public class DictionaryProperty : IDictionaryProperty
     {
-        private int codePage;
+        private readonly int _codePage;
 
         public DictionaryProperty(int codePage)
         {
-            this.codePage = codePage;
-            this.entries = new Dictionary<uint, string>();
+            _codePage = codePage;
+            _entries = new Dictionary<uint, string>();
 
         }
 
-        public PropertyType PropertyType
-        {
-            get
-            {
-                return PropertyType.DictionaryProperty;
-            }
-        }
+        public PropertyType PropertyType => PropertyType.DictionaryProperty;
 
-        private Dictionary<uint, string> entries;
+        private Dictionary<uint, string> _entries;
 
         public object Value
         {
-            get { return entries; }
-            set { entries = (Dictionary<uint, string>)value; }
+            get => _entries;
+            set => _entries = (Dictionary<uint, string>)value;
         }
 
         public void Read(BinaryReader br)
         {
-            long curPos = br.BaseStream.Position;
+            var curPos = br.BaseStream.Position;
 
-            uint numEntries = br.ReadUInt32();
+            var numEntries = br.ReadUInt32();
 
             for (uint i = 0; i < numEntries; i++)
             {
-                DictionaryEntry de = new DictionaryEntry(codePage);
+                var de = new DictionaryEntry(_codePage);
 
                 de.Read(br);
-                this.entries.Add(de.PropertyIdentifier, de.Name);
+                _entries.Add(de.PropertyIdentifier, de.Name);
             }
 
-            int m = (int)(br.BaseStream.Position - curPos) % 4;
+            var m = (int)(br.BaseStream.Position - curPos) % 4;
 
             if (m > 0)
             {
-                for(int i = 0; i < m; i++)
+                for(var i = 0; i < m; i++)
                 {
                     br.ReadByte();
                 }
@@ -61,15 +54,15 @@ namespace OpenMcdf.Extensions.OLEProperties
 
         public void Write(BinaryWriter bw)
         {
-            bw.Write(entries.Count);
+            bw.Write(_entries.Count);
 
-            foreach (KeyValuePair<uint, string> kv in entries)
+            foreach (var kv in _entries)
             {
                 bw.Write(kv.Key);
-                string s = kv.Value;
+                var s = kv.Value;
                 if (!s.EndsWith("\0"))
                     s += "\0";
-                bw.Write(Encoding.GetEncoding(this.codePage).GetBytes(s));
+                bw.Write(Encoding.GetEncoding(_codePage).GetBytes(s));
             }
 
         }

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OpenMcdf;
 
 namespace OpenMcdf.Test
 {
@@ -10,16 +8,11 @@ namespace OpenMcdf.Test
     /// Summary description for CFTorageTest
     /// </summary>
     [TestClass]
-    public class CFSTorageTest
+    public class CfsTorageTest
     {
         //const String OUTPUT_DIR = "C:\\TestOutputFiles\\";
 
-        public CFSTorageTest()
-        {
-
-        }
-
-        private TestContext testContextInstance;
+        private TestContext _testContextInstance;
 
         /// <summary>
         ///Gets or sets the test context which provides
@@ -27,14 +20,8 @@ namespace OpenMcdf.Test
         ///</summary>
         public TestContext TestContext
         {
-            get
-            {
-                return testContextInstance;
-            }
-            set
-            {
-                testContextInstance = value;
-            }
+            get => _testContextInstance;
+            set => _testContextInstance = value;
         }
 
         #region Additional test attributes
@@ -63,26 +50,26 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_CREATE_STORAGE()
         {
-            const String STORAGE_NAME = "NewStorage";
-            CompoundFile cf = new CompoundFile();
+            const string storageName = "NewStorage";
+            var cf = new CompoundFile();
 
-            CFStorage st = cf.RootStorage.AddStorage(STORAGE_NAME);
+            var st = cf.RootStorage.AddStorage(storageName);
 
             Assert.IsNotNull(st);
-            Assert.AreEqual(STORAGE_NAME, st.Name, false);
+            Assert.AreEqual(storageName, st.Name, false);
         }
 
         [TestMethod]
         public void Test_CREATE_STORAGE_WITH_CREATION_DATE()
         {
-            const String STORAGE_NAME = "NewStorage1";
-            CompoundFile cf = new CompoundFile();
+            const string storageName = "NewStorage1";
+            var cf = new CompoundFile();
 
-            CFStorage st = cf.RootStorage.AddStorage(STORAGE_NAME);
+            var st = cf.RootStorage.AddStorage(storageName);
             st.CreationDate = DateTime.Now;
 
             Assert.IsNotNull(st);
-            Assert.AreEqual(STORAGE_NAME, st.Name, false);
+            Assert.AreEqual(storageName, st.Name, false);
 
             cf.Save("ProvaData.cfs");
             cf.Close();
@@ -91,13 +78,13 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_VISIT_ENTRIES()
         {
-            const String STORAGE_NAME = "report.xls";
-            CompoundFile cf = new CompoundFile(STORAGE_NAME);
+            const string storageName = "report.xls";
+            var cf = new CompoundFile(storageName);
 
-            FileStream output = new FileStream("LogEntries.txt", FileMode.Create);
+            var output = new FileStream("LogEntries.txt", FileMode.Create);
             TextWriter tw = new StreamWriter(output);
 
-            Action<CFItem> va = delegate (CFItem item)
+            var va = delegate (CfItem item)
             {
                 tw.WriteLine(item.Name);
             };
@@ -112,16 +99,16 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_TRY_GET_STREAM_STORAGE()
         {
-            String FILENAME = "MultipleStorage.cfs";
-            CompoundFile cf = new CompoundFile(FILENAME);
+            var filename = "MultipleStorage.cfs";
+            var cf = new CompoundFile(filename);
 
-            CFStorage st = null;
+            CfStorage st = null;
             cf.RootStorage.TryGetStorage("MyStorage", out st);
             Assert.IsNotNull(st);
 
             try
             {
-                CFStorage nf = null;
+                CfStorage nf = null;
                 cf.RootStorage.TryGetStorage("IDONTEXIST", out nf);
                 Assert.IsNull(nf);
             }
@@ -132,10 +119,10 @@ namespace OpenMcdf.Test
 
             try
             {
-                CFStream s = null;
+                CfStream s = null;
                 st.TryGetStream("MyStream", out s);
                 Assert.IsNotNull(s);
-                CFStream ns = null;
+                CfStream ns = null;
                 st.TryGetStream("IDONTEXIST2", out ns);
                 Assert.IsNull(ns);
             }
@@ -148,18 +135,18 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_TRY_GET_STREAM_STORAGE_NEW()
         {
-            String FILENAME = "MultipleStorage.cfs";
-            CompoundFile cf = new CompoundFile(FILENAME);
-            CFStorage st = null;
-            bool bs = cf.RootStorage.TryGetStorage("MyStorage", out st);
+            var filename = "MultipleStorage.cfs";
+            var cf = new CompoundFile(filename);
+            CfStorage st = null;
+            var bs = cf.RootStorage.TryGetStorage("MyStorage", out st);
 
             Assert.IsTrue(bs);
             Assert.IsNotNull(st);
 
             try
             {
-                CFStorage nf = null;
-                bool nb = cf.RootStorage.TryGetStorage("IDONTEXIST", out nf);
+                CfStorage nf = null;
+                var nb = cf.RootStorage.TryGetStorage("IDONTEXIST", out nf);
                 Assert.IsFalse(nb);
                 Assert.IsNull(nf);
             }
@@ -170,9 +157,9 @@ namespace OpenMcdf.Test
 
             try
             {
-                var b = st.TryGetStream("MyStream", out CFStream s);
+                var b = st.TryGetStream("MyStream", out var s);
                 Assert.IsNotNull(s);
-                b = st.TryGetStream("IDONTEXIST2", out CFStream ns);
+                b = st.TryGetStream("IDONTEXIST2", out var ns);
                 Assert.IsFalse(b);
             }
             catch (Exception)
@@ -188,7 +175,7 @@ namespace OpenMcdf.Test
 
             try
             {
-                f = new CompoundFile("CorruptedDoc_bug3547815.doc", CFSUpdateMode.ReadOnly, CFSConfiguration.NoValidationException);
+                f = new CompoundFile("CorruptedDoc_bug3547815.doc", CfsUpdateMode.ReadOnly, CfsConfiguration.NoValidationException);
             }
             catch
             {
@@ -204,7 +191,7 @@ namespace OpenMcdf.Test
                 using (TextWriter tw = new StreamWriter(output))
                 {
 
-                    Action<CFItem> va = delegate (CFItem item)
+                    var va = delegate (CfItem item)
                        {
                            tw.WriteLine(item.Name);
                        };
@@ -215,7 +202,7 @@ namespace OpenMcdf.Test
             }
             catch (Exception ex)
             {
-                Assert.IsTrue(ex is CFCorruptedFileException);
+                Assert.IsTrue(ex is CfCorruptedFileException);
                 Assert.IsTrue(f != null && f.IsClosed);
 
             }
@@ -237,7 +224,7 @@ namespace OpenMcdf.Test
             try
             {
                 //Corrupted file has invalid children item sid reference
-                f = new CompoundFile("CorruptedDoc_bug3547815_B.doc", CFSUpdateMode.ReadOnly, CFSConfiguration.NoValidationException);
+                f = new CompoundFile("CorruptedDoc_bug3547815_B.doc", CfsUpdateMode.ReadOnly, CfsConfiguration.NoValidationException);
             }
             catch
             {
@@ -254,7 +241,7 @@ namespace OpenMcdf.Test
                 using (TextWriter tw = new StreamWriter(output))
                 {
 
-                    Action<CFItem> va = delegate (CFItem item)
+                    var va = delegate (CfItem item)
                     {
                         tw.WriteLine(item.Name);
                     };
@@ -280,39 +267,39 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_VISIT_STORAGE()
         {
-            String FILENAME = "testVisiting.xls";
+            var filename = "testVisiting.xls";
 
             // Remove...
-            if (File.Exists(FILENAME))
-                File.Delete(FILENAME);
+            if (File.Exists(filename))
+                File.Delete(filename);
 
             //Create...
 
-            CompoundFile ncf = new CompoundFile();
+            var ncf = new CompoundFile();
 
-            CFStorage l1 = ncf.RootStorage.AddStorage("Storage Level 1");
+            var l1 = ncf.RootStorage.AddStorage("Storage Level 1");
             l1.AddStream("l1ns1");
             l1.AddStream("l1ns2");
             l1.AddStream("l1ns3");
 
-            CFStorage l2 = l1.AddStorage("Storage Level 2");
+            var l2 = l1.AddStorage("Storage Level 2");
             l2.AddStream("l2ns1");
             l2.AddStream("l2ns2");
 
-            ncf.Save(FILENAME);
+            ncf.Save(filename);
             ncf.Close();
 
 
             // Read...
 
-            CompoundFile cf = new CompoundFile(FILENAME);
+            var cf = new CompoundFile(filename);
 
-            FileStream output = new FileStream("reportVisit.txt", FileMode.Create);
+            var output = new FileStream("reportVisit.txt", FileMode.Create);
             TextWriter sw = new StreamWriter(output);
 
             Console.SetOut(sw);
 
-            Action<CFItem> va = delegate (CFItem target)
+            var va = delegate (CfItem target)
             {
                 sw.WriteLine(target.Name);
             };
@@ -326,10 +313,10 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_DELETE_DIRECTORY()
         {
-            String FILENAME = "MultipleStorage2.cfs";
-            CompoundFile cf = new CompoundFile(FILENAME, CFSUpdateMode.ReadOnly, CFSConfiguration.Default);
+            var filename = "MultipleStorage2.cfs";
+            var cf = new CompoundFile(filename, CfsUpdateMode.ReadOnly, CfsConfiguration.Default);
 
-            CFStorage st = cf.RootStorage.GetStorage("MyStorage");
+            var st = cf.RootStorage.GetStorage("MyStorage");
 
             Assert.IsNotNull(st);
 
@@ -343,11 +330,11 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_DELETE_MINISTREAM_STREAM()
         {
-            String FILENAME = "MultipleStorage2.cfs";
-            CompoundFile cf = new CompoundFile(FILENAME);
+            var filename = "MultipleStorage2.cfs";
+            var cf = new CompoundFile(filename);
 
-            CFStorage found = null;
-            Action<CFItem> action = delegate (CFItem item) { if (item.Name == "AnotherStorage") found = item as CFStorage; };
+            CfStorage found = null;
+            var action = delegate (CfItem item) { if (item.Name == "AnotherStorage") found = item as CfStorage; };
             cf.RootStorage.VisitEntries(action, true);
 
             Assert.IsNotNull(found);
@@ -361,14 +348,14 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_DELETE_STREAM()
         {
-            String FILENAME = "MultipleStorage3.cfs";
-            CompoundFile cf = new CompoundFile(FILENAME);
+            var filename = "MultipleStorage3.cfs";
+            var cf = new CompoundFile(filename);
 
-            CFStorage found = null;
-            Action<CFItem> action = delegate (CFItem item)
+            CfStorage found = null;
+            var action = delegate (CfItem item)
             {
                 if (item.Name == "AnotherStorage")
-                    found = item as CFStorage;
+                    found = item as CfStorage;
             };
 
             cf.RootStorage.VisitEntries(action, true);
@@ -384,27 +371,27 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_CHECK_DISPOSED_()
         {
-            const String FILENAME = "MultipleStorage.cfs";
-            CompoundFile cf = new CompoundFile(FILENAME);
+            const string filename = "MultipleStorage.cfs";
+            var cf = new CompoundFile(filename);
 
-            CFStorage st = cf.RootStorage.GetStorage("MyStorage");
+            var st = cf.RootStorage.GetStorage("MyStorage");
             cf.Close();
 
             try
             {
-                byte[] temp = st.GetStream("MyStream").GetData();
+                var temp = st.GetStream("MyStream").GetData();
                 Assert.Fail("Stream without media");
             }
             catch (Exception ex)
             {
-                Assert.IsTrue(ex is CFDisposedException);
+                Assert.IsTrue(ex is CfDisposedException);
             }
         }
 
         [TestMethod]
         public void Test_LAZY_LOAD_CHILDREN_()
         {
-            CompoundFile cf = new CompoundFile();
+            var cf = new CompoundFile();
             cf.RootStorage.AddStorage("Level_1")
                 .AddStorage("Level_2")
                 .AddStream("Level2Stream")
@@ -415,10 +402,10 @@ namespace OpenMcdf.Test
             cf.Close();
 
             cf = new CompoundFile("$Hel1");
-            IList<CFItem> i = cf.GetAllNamedEntries("Level2Stream");
+            var i = cf.GetAllNamedEntries("Level2Stream");
             Assert.IsNotNull(i[0]);
-            Assert.IsTrue(i[0] is CFStream);
-            Assert.IsTrue((i[0] as CFStream).GetData().Length == 100);
+            Assert.IsTrue(i[0] is CfStream);
+            Assert.IsTrue((i[0] as CfStream).GetData().Length == 100);
             cf.Save("$Hel2");
             cf.Close();
 
@@ -435,7 +422,7 @@ namespace OpenMcdf.Test
         [TestMethod]
         public void Test_FIX_BUG_31()
         {
-            CompoundFile cf = new CompoundFile();
+            var cf = new CompoundFile();
             cf.RootStorage.AddStorage("Level_1")
 
                 .AddStream("Level2Stream")
@@ -445,23 +432,23 @@ namespace OpenMcdf.Test
 
             cf.Close();
 
-            CompoundFile cf1 = new CompoundFile("$Hel3");
+            var cf1 = new CompoundFile("$Hel3");
             try
             {
-                CFStream cs = cf1.RootStorage.GetStorage("Level_1").AddStream("Level2Stream");
+                var cs = cf1.RootStorage.GetStorage("Level_1").AddStream("Level2Stream");
             }
             catch (Exception ex)
             {
-                Assert.IsTrue(ex.GetType() == typeof(CFDuplicatedItemException));
+                Assert.IsTrue(ex.GetType() == typeof(CfDuplicatedItemException));
             }
 
         }
 
         [TestMethod]
-        [ExpectedException(typeof(OpenMcdf.CFCorruptedFileException))]
+        [ExpectedException(typeof(CfCorruptedFileException))]
         public void Test_CORRUPTEDDOC_BUG36_SHOULD_THROW_CORRUPTED_FILE_EXCEPTION()
         {
-            using (CompoundFile file = new CompoundFile("CorruptedDoc_bug36.doc", CFSUpdateMode.ReadOnly, CFSConfiguration.NoValidationException))
+            using (var file = new CompoundFile("CorruptedDoc_bug36.doc", CfsUpdateMode.ReadOnly, CfsConfiguration.NoValidationException))
             {
                 //Many thanks to theseus for bug reporting
             }

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows.Forms;
 using System.Drawing;
+using System.Windows.Forms;
 using OpenMcdf;
 
 namespace StructuredStorageExplorer
@@ -11,11 +9,11 @@ namespace StructuredStorageExplorer
     {
         public static DialogResult InputBox(string title, string promptText, ref string value)
         {
-            Form form = new Form();
-            Label label = new Label();
-            TextBox textBox = new TextBox();
-            Button buttonOk = new Button();
-            Button buttonCancel = new Button();
+            var form = new Form();
+            var label = new Label();
+            var textBox = new TextBox();
+            var buttonOk = new Button();
+            var buttonCancel = new Button();
 
             form.Text = title;
             label.Text = promptText;
@@ -46,14 +44,14 @@ namespace StructuredStorageExplorer
             form.AcceptButton = buttonOk;
             form.CancelButton = buttonCancel;
 
-            DialogResult dialogResult = form.ShowDialog();
+            var dialogResult = form.ShowDialog();
             value = textBox.Text;
             return dialogResult;
         }
 
         public static bool IsStreamTreeNode(TreeNode node)
         {
-            return ((CFItem)node.Tag).IsStream;
+            return ((CfItem)node.Tag).IsStream;
         }
     }
 

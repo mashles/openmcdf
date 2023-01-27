@@ -16,8 +16,8 @@ namespace OpenMcdf.Benchmark
     {
         private const int Kb = 1024;
         private const int Mb = Kb * Kb;
-        private const string storageName = "MyStorage";
-        private const string streamName = "MyStream";
+        private const string StorageName = "MyStorage";
+        private const string StreamName = "MyStream";
 
         private byte[] _readBuffer;
 
@@ -59,8 +59,8 @@ namespace OpenMcdf.Benchmark
             //
             var compoundFile = new CompoundFile(_stream);
             var cfStream = compoundFile.RootStorage
-                .GetStorage(storageName)
-                .GetStream(streamName + 0);
+                .GetStorage(StorageName)
+                .GetStream(StreamName + 0);
             var streamSize = cfStream.Size;
             var position = 0L;
             while (true)
@@ -81,13 +81,13 @@ namespace OpenMcdf.Benchmark
 
             var buffer = new byte[BufferSize];
             Array.Fill(buffer, byte.MaxValue);
-            const CFSConfiguration flags = CFSConfiguration.Default | CFSConfiguration.LeaveOpen;
-            using (var compoundFile = new CompoundFile(CFSVersion.Ver_4, flags))
+            const CfsConfiguration flags = CfsConfiguration.Default | CfsConfiguration.LeaveOpen;
+            using (var compoundFile = new CompoundFile(CfsVersion.Ver4, flags))
             {
-                var st = compoundFile.RootStorage.AddStorage(storageName);
+                var st = compoundFile.RootStorage.AddStorage(StorageName);
                 for (var streamId = 0; streamId < streamCount; ++streamId)
                 {
-                    var sm = st.AddStream(streamName + streamId);
+                    var sm = st.AddStream(StreamName + streamId);
 
                     for (var iteration = 0; iteration < iterationCount; ++iteration) sm.Append(buffer);
                 }

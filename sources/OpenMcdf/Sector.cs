@@ -10,103 +10,72 @@
 using System;
 using System.IO;
 
-
 namespace OpenMcdf
 {
     internal enum SectorType
     {
-        Normal, Mini, FAT, DIFAT, RangeLockSector, Directory
+        Normal, Mini, Fat, Difat, RangeLockSector, Directory
     }
 
     internal class Sector : IDisposable
     {
-        public static int MINISECTOR_SIZE = 64;
+        public static int MinisectorSize = 64;
 
-        public const int FREESECT = unchecked((int)0xFFFFFFFF);
-        public const int ENDOFCHAIN = unchecked((int)0xFFFFFFFE);
-        public const int FATSECT = unchecked((int)0xFFFFFFFD);
-        public const int DIFSECT = unchecked((int)0xFFFFFFFC);
+        public const int Freesect = unchecked((int)0xFFFFFFFF);
+        public const int Endofchain = unchecked((int)0xFFFFFFFE);
+        public const int Fatsect = unchecked((int)0xFFFFFFFD);
+        public const int Difsect = unchecked((int)0xFFFFFFFC);
 
-        private bool dirtyFlag = false;
+        private bool _dirtyFlag;
 
         public bool DirtyFlag
         {
-            get { return dirtyFlag; }
-            set { dirtyFlag = value; }
+            get => _dirtyFlag;
+            set => _dirtyFlag = value;
         }
 
-        public bool IsStreamed
-        {
-            get { return (stream != null && size != MINISECTOR_SIZE) ? (this.id * size) + size < stream.Length : false; }
-        }
+        public bool IsStreamed => (_stream != null && Size != MinisectorSize) ? (Id * Size) + Size < _stream.Length : false;
 
-        private int size = 0;
-        private Stream stream;
+        private readonly Stream _stream;
 
 
         public Sector(int size, Stream stream)
         {
-            this.size = size;
-            this.stream = stream;
+            Size = size;
+            _stream = stream;
         }
 
         public Sector(int size, byte[] data)
         {
-            this.size = size;
-            this.data = data;
-            this.stream = null;
+            Size = size;
+            _data = data;
+            _stream = null;
         }
 
         public Sector(int size)
         {
-            this.size = size;
-            this.data = null;
-            this.stream = null;
+            Size = size;
+            _data = null;
+            _stream = null;
         }
 
-        private SectorType type;
+        internal SectorType Type { get; set; }
 
-        internal SectorType Type
-        {
-            get { return type; }
-            set { type = value; }
-        }
+        public int Id { get; set; } = -1;
 
-        private int id = -1;
+        public int Size { get; private set; }
 
-        public int Id
-        {
-            get { return id; }
-            set
-            {
-                id = value;
-            }
-        }
-
-        public int Size
-        {
-            get
-            {
-                return size;
-            }
-        }
-
-        private byte[] data;
+        private byte[] _data;
 
         public byte[] GetData()
         {
-            if (this.data == null)
-            {
-                data = new byte[size];
+            if (_data != null) return _data;
+            _data = new byte[Size];
 
-                if (IsStreamed)
-                {
-                    stream.Seek((long)size + (long)this.id * (long)size, SeekOrigin.Begin);
-                    stream.Read(data, 0, size);
-                }
-            }
-
-            return data;
+            if (!IsStreamed) return _data;
+            _stream.Seek(Size + Id * (long)Size, SeekOrigin.Begin);
+            _stream.Read(_data, 0, Size);
+            return _data;
         }
 
         //public void SetSectorData(byte[] b)
@@ -127,53 +96,51 @@ namespace OpenMcdf
 
         public void ZeroData()
         {
-            data = new byte[size];
-            dirtyFlag = true;
+            _data = new byte[Size];
+            _dirtyFlag = true;
         }
 
-        public void InitFATData()
+        public void InitFatData()
         {
-            data = new byte[size];
+            _data = new byte[Size];
             
-            for (int i = 0; i < size; i++)
-                data[i] = 0xFF;
+            for (var i = 0; i < Size; i++)
+                _data[i] = 0xFF;
 
-            dirtyFlag = true;
+            _dirtyFlag = true;
         }
 
         internal void ReleaseData()
         {
-            this.data = null;
+            _data = null;
         }
 
-        private object lockObject = new Object();
+        private readonly object _lockObject = new object();
 
         /// <summary>
         /// When called from user code, release all resources, otherwise, in the case runtime called it,
-        /// only unmanagd resources are released.
+        /// only unmanaged resources are released.
         /// </summary>
         /// <param name="disposing">If true, method has been called from User code, if false it's been called from .net runtime</param>
         protected virtual void Dispose(bool disposing)
         {
             try
             {
-                if (!_disposed)
+                if (_disposed) return;
+                lock (_lockObject)
                 {
-                    lock (lockObject)
+                    if (disposing)
                     {
-                        if (disposing)
-                        {
-                            // Call from user code...
+                        // Call from user code...
 
-
-                        }
-
-                        this.data = null;
-                        this.dirtyFlag = false;
-                        this.id = Sector.ENDOFCHAIN;
-                        this.size = 0;
 
                     }
+
+                    _data = null;
+                    _dirtyFlag = false;
+                    Id = Endofchain;
+                    Size = 0;
+
                 }
             }
             finally
