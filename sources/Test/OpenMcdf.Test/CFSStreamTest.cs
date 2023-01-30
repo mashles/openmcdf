@@ -81,7 +81,31 @@ namespace OpenMcdf.Test
             Assert.IsTrue(myStream.Size == bufferLength, "Stream size differs from buffer size");
 
         }
-        
+        [TestMethod]
+        public void Test_WRITE_STREAM_TO_LARGE()
+        {
+            const int bufferLength = 1000000;
+
+            var b = Helpers.GetBuffer(bufferLength);
+
+            using var cf = new CompoundFile("C:\\Users\\mash_\\Dev\\Testing\\SourceOne\\923F4974EA1A8A2C2521A0D2CEFAE320BA9806EB00.msg");
+            if (cf.RootStorage.TryGetStorage("__attach_version1.0_#00000000", out var attSt))
+            {
+                if (attSt.TryGetStorage("__substg1.0_3701000D", out var inside))
+                {
+                    var myStream = inside.AddStream("MyStream" + Random.Shared.Next());
+
+                    Assert.IsNotNull(myStream);
+                    Assert.IsTrue(myStream.Size == 0);
+
+                    myStream.SetData(b);
+
+                    Assert.IsTrue(myStream.Size == bufferLength, "Stream size differs from buffer size");
+                }
+            }
+        }
+
+
         [TestMethod]
         public void Test_WRITE_SPAN_STREAM()
         {

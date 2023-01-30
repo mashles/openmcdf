@@ -84,6 +84,19 @@ namespace OpenMcdf
         }
 
         /// <summary>
+        /// Write a data buffer to a specific position into current CFStream object
+        /// </summary>
+        /// <param name="data">Data buffer to Write</param>
+        /// <param name="position">Position into the stream object to start writing from</param>
+        /// <remarks>Current stream will be extended to receive data buffer over 
+        /// its current size</remarks>
+        public void Write(ReadOnlySpan<byte> data, long position)
+        {
+            CheckDisposed();
+            CompoundFile.WriteData(this, data, position, 0, data.Length);
+        }
+
+        /// <summary>
         /// Write <paramref name="count">count</paramref> bytes of a data buffer to a specific position into 
         /// the current CFStream object starting from the specified position.
         /// </summary>
