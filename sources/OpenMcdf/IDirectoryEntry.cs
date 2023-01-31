@@ -9,11 +9,11 @@
 
 using System;
 using System.IO;
-using RedBlackTree;
+using OpenMcdf.RBTree;
 
 namespace OpenMcdf
 {
-    internal interface IDirectoryEntry : IComparable, IRbNode
+    public interface IDirectoryEntry : IComparable, IRbNode
     {
         int Child { get; set; }
         byte[] CreationDate { get; set; }
@@ -28,7 +28,7 @@ namespace OpenMcdf
         void SetEntryName(string entryName);
         int Sid { get; set; }
         long Size { get; set; }
-        int StartSetc { get; set; }
+        int StartSector { get; set; }
         int StateBits { get; set; }
         StgColor StgColor { get; set; }
         StgType StgType { get; set; }

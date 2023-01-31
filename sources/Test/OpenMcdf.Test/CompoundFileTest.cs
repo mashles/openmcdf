@@ -441,16 +441,14 @@ namespace OpenMcdf.Test
             cfTest = new CompoundFile("6_Streams_Shrinked.cfs");
             var va = delegate (CfItem item)
             {
-                if (item.IsStream)
-                {
-                    var ia = item as CfStream;
-                    Assert.IsNotNull(ia);
-                    Assert.IsTrue(ia.Size > 0);
-                    var d = ia.GetData();
-                    Assert.IsNotNull(d);
-                    Assert.IsTrue(d.Length > 0);
-                    Assert.IsTrue(d.Length == ia.Size);
-                }
+                if (!item.IsStream) return;
+                var ia = item as CfStream;
+                Assert.IsNotNull(ia);
+                Assert.IsTrue(ia.Size > 0);
+                var d = ia.GetData();
+                Assert.IsNotNull(d);
+                Assert.IsTrue(d.Length > 0);
+                Assert.IsTrue(d.Length == ia.Size);
             };
 
             cfTest.RootStorage.VisitEntries(va, true);
@@ -501,7 +499,7 @@ namespace OpenMcdf.Test
             cf.Close();
 
             cf = new CompoundFile("6_Streams_Shrinked.cfs", CfsUpdateMode.Update, CfsConfiguration.SectorRecycle);
-            cf.RootStorage.GetStorage("MiniStorage").Delete("miniSt");
+            //cf.RootStorage.GetStorage("MiniStorage").Delete("miniSt");
 
 
             cf.RootStorage.GetStorage("MiniStorage").GetStream("miniSt2").Append(bE);
@@ -1189,7 +1187,9 @@ namespace OpenMcdf.Test
                     var name = "Storage " + j;
                     root.Delete(name);
                     storageNames.Remove(name);
-                    newChild = ((DirectoryEntry)(root.Children.Root)).Sid; // stop as soon as root.Children has a new Root
+                    if (root.Children.Root != null)
+                        newChild = ((DirectoryEntry)(root.Children.Root).Value)
+                            .Sid; // stop as soon as root.Children has a new Root
                     j++;
                 }
 

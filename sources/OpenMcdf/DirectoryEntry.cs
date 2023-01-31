@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using RedBlackTree;
+using OpenMcdf.RBTree;
 
 namespace OpenMcdf
 {
@@ -32,8 +32,8 @@ namespace OpenMcdf
 
     internal class DirectoryEntry : IDirectoryEntry
     {
-        internal const int ThisIsGreater = 1;
-        internal const int OtherIsGreater = -1;
+        private const int ThisIsGreater = 1;
+        private const int OtherIsGreater = -1;
         private readonly IList<IDirectoryEntry> _dirRepository;
 
         private int _sid = -1;
@@ -55,15 +55,15 @@ namespace OpenMcdf
 
             _stgType = stgType;
 
-            if (stgType == StgType.StgStorage)
+            switch (stgType)
             {
-                _creationDate = BitConverter.GetBytes((DateTime.Now.ToFileTime()));
-                StartSetc = Zero;
-            }
-
-            if (stgType == StgType.StgInvalid)
-            {
-                StartSetc = Zero;
+                case StgType.StgStorage:
+                    _creationDate = BitConverter.GetBytes((DateTime.Now.ToFileTime()));
+                    StartSector = Zero;
+                    break;
+                case StgType.StgInvalid:
+                    StartSector = Zero;
+                    break;
             }
 
             if (name != string.Empty)
@@ -82,12 +82,7 @@ namespace OpenMcdf
         //}
         public string GetEntryName()
         {
-            if (_entryName != null && _entryName.Length > 0)
-            {
-                return Encoding.Unicode.GetString(_entryName).Remove((NameLength - 1) / 2);
-            }
-
-            return string.Empty;
+            return _entryName is { Length: > 0 } ? Encoding.Unicode.GetString(_entryName).Remove((NameLength - 1) / 2) : string.Empty;
         }
 
         public void SetEntryName(string entryName)
@@ -100,10 +95,10 @@ namespace OpenMcdf
             else
             {
                 if (
-                    entryName.Contains(@"\") ||
-                    entryName.Contains(@"/") ||
-                    entryName.Contains(@":") ||
-                    entryName.Contains(@"!")
+                    entryName.Contains('\\') ||
+                    entryName.Contains('/') ||
+                    entryName.Contains(':') ||
+                    entryName.Contains('!')
 
                     )
                     throw new CfException("Invalid character in entry: the characters '\\', '/', ':','!' cannot be used in entry name");
@@ -197,7 +192,7 @@ namespace OpenMcdf
         }
 
         private int _startSetc = Sector.Endofchain;
-        public int StartSetc
+        public int StartSector
         {
             get => _startSetc;
             set => _startSetc = value;
@@ -212,7 +207,6 @@ namespace OpenMcdf
 
         public int CompareTo(object obj)
         {
-
             var otherDir = obj as IDirectoryEntry;
 
             if (otherDir == null)
@@ -368,40 +362,14 @@ namespace OpenMcdf
 
         public IRbNode Left
         {
-            get
-            {
-                if (_leftSibling == Nostream)
-                    return null;
-
-                return _dirRepository[_leftSibling];
-            }
-            set
-            {
-                _leftSibling = value != null ? ((IDirectoryEntry)value).Sid : Nostream;
-
-                if (_leftSibling != Nostream)
-                    _dirRepository[_leftSibling].Parent = this;
-            }
+            get => _leftSibling == Nostream ? null : _dirRepository[_leftSibling];
+            set => _leftSibling = ((IDirectoryEntry)value)?.Sid ?? Nostream;
         }
 
         public IRbNode Right
         {
-            get
-            {
-                if (_rightSibling == Nostream)
-                    return null;
-
-                return _dirRepository[_rightSibling];
-            }
-            set
-            {
-
-                _rightSibling = value != null ? ((IDirectoryEntry)value).Sid : Nostream;
-
-                if (_rightSibling != Nostream)
-                    _dirRepository[_rightSibling].Parent = this;
-
-            }
+            get => _rightSibling == Nostream ? null : _dirRepository[_rightSibling];
+            set => _rightSibling = ((IDirectoryEntry)value)?.Sid ?? Nostream;
         }
 
         public Color Color
@@ -420,14 +388,12 @@ namespace OpenMcdf
 
         public IRbNode Grandparent()
         {
-            return _parent != null ? _parent.Parent : null;
+            return _parent?.Parent;
         }
 
         public IRbNode Sibling()
         {
-            if (this == Parent.Left)
-                return Parent.Right;
-            return Parent.Left;
+            return Equals(this, Parent.Left) ? Parent.Right : Parent.Left;
         }
 
         public IRbNode Uncle()
@@ -446,7 +412,7 @@ namespace OpenMcdf
                 de.Sid = dirRepository.Count - 1;
             }
             else
-                throw new ArgumentNullException("dirRepository", "Directory repository cannot be null in New() method");
+                throw new ArgumentNullException(nameof(dirRepository), "Directory repository cannot be null in New() method");
 
             return de;
         }
@@ -464,18 +430,13 @@ namespace OpenMcdf
 
             // If we are not adding an invalid dirEntry as
             // in a normal loading from file (invalid dirs MAY pad a sector)
-            if (de != null)
+            // Find first available invalid slot (if any) to reuse it
+            for (var i = 0; i < dirRepository.Count; i++)
             {
-                // Find first available invalid slot (if any) to reuse it
-                for (var i = 0; i < dirRepository.Count; i++)
-                {
-                    if (dirRepository[i].StgType == StgType.StgInvalid)
-                    {
-                        dirRepository[i] = de;
-                        de.Sid = i;
-                        return de;
-                    }
-                }
+                if (dirRepository[i].StgType != StgType.StgInvalid) continue;
+                dirRepository[i] = de;
+                de.Sid = i;
+                return de;
             }
 
             // No invalid directory entry found
